@@ -55,8 +55,8 @@ function init() {
   windmill.add(foundation, tower, turbineBody, turbineCone, turbineRotor)
   for (let i = 0; i < numWindmills; i++) {
     const newWindmill = windmill.clone()
-    newWindmill.position.x = i * 6
-    newWindmill.position.z = i * 6
+    newWindmill.position.x = i % 2 === 0 ? i * 6 : -i * 6
+    newWindmill.position.z = i % 2 === 0 ? i * 6 : -i * 6
     scene.add(newWindmill)
   }
 
@@ -99,8 +99,6 @@ function animate(time) {
   if(turRotorParams.rotate === true) {
     const speed = windParams.speed
     const windAngle = THREE.MathUtils.degToRad(windParams.direction);
-    //rotation is slowest at 90 and 270 and fastest at 0, 180, 360
-    //rotation is slowest at 0.25 and 0.75 and fastest at 0, 0.5, 1
     turbineRotor.rotateZ(-speed/3 * Math.cos(windAngle + 0.1))
   }
   animateWind(time)
