@@ -3,7 +3,7 @@ import GUI from 'lil-gui';
 import { OrbitControls } from "three/examples/jsm/Addons.js"
 import {foundation, tower} from "./windmill/tower"
 import {turbineBody, turbineRotor, turbineCone, turRotorParams} from "./windmill/turbine"
-import {terrain} from "./terrain"
+import {terrain, terrainParams} from "./terrain"
 import { wind, animateWind, windParams } from "./wind/wind";
 import setUpDebugGUI from "./debug";
 
@@ -20,7 +20,7 @@ function init() {
   scene.add(axesHelper)
 
   // Camera
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 200)
   camera.position.y = 17
   camera.position.z = 18
   camera.position.x = 12
@@ -50,14 +50,61 @@ function init() {
   scene.add(terrain)
   
   // Windmill
-  const numWindmills = 6
+  const windmillParams = {
+    quantity: 20,
+    bufferScaleFactor: 8,
+    bBoxArray: [],
+    randomness: [],
+  }
   const windmill = new THREE.Group()
   windmill.add(foundation, tower, turbineBody, turbineCone, turbineRotor)
-  for (let i = 0; i < numWindmills; i++) {
+  // scene.add(windmill)
+
+  const windmillBBox = new THREE.Box3().setFromObject(windmill).expandByScalar(windmillParams.bufferScaleFactor)
+  windmillParams.bBoxArray.push(windmillBBox)
+  const helper = new THREE.Box3Helper( windmillBBox, 0xffff00 );
+  scene.add( helper );
+  
+  for (let i = 0; i < windmillParams.quantity; i++) {
+        let isInsideBox = true
+    let isSafeDistAway = false
+    let proposedX = 0
+    let proposedZ = 0
+    let attempts = 0
+   
+    function isPointInsideBox() {
+      proposedX = (Math.random() - 0.5) * terrainParams.width
+      proposedZ = (Math.random() - 0.5) * terrainParams.width
+    
+      const newTestBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(proposedX, 0, proposedZ), windmillBBox.getSize(new THREE.Vector3()))
+      
+      isSafeDistAway = windmillParams.bBoxArray.every((box) => {
+        const hasIntersection = newTestBox.intersectsBox(box)
+         return !hasIntersection
+      })    
+      return isSafeDistAway
+    }
+    
+    while (!isSafeDistAway) {
+      isPointInsideBox()
+      attempts++
+    }
+    
+    if (attempts >= 10) {
+      console.warn("You can't place any more windmills in this space. Expand the area to place more.");
+    }    
+
+    // Create new windmill
+    
     const newWindmill = windmill.clone()
-    newWindmill.position.x = i % 2 === 0 ? i * 6 : -i * 6
-    newWindmill.position.z = i % 2 === 0 ? i * 6 : -i * 6
+    newWindmill.position.set(proposedX, 0, proposedZ)
     scene.add(newWindmill)
+
+    // new BoundingBox
+    const newWindmillBBox = new THREE.Box3().setFromObject(newWindmill).expandByScalar(windmillParams.bufferScaleFactor)
+    const newHelper = new THREE.Box3Helper(newWindmillBBox, 0xffff00)
+    scene.add(newHelper)
+    windmillParams.bBoxArray.push(newWindmillBBox)
   }
 
   // Wind
