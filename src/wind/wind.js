@@ -17,6 +17,25 @@ const gradient = context.createLinearGradient( 0, 0, 64, 0 );
 
 const texture = new THREE.CanvasTexture( canvas );
 
+class WindLine {
+    width = 20
+    height = 0.5
+    widthSegments = 30
+    heightSegments = 1
+
+    constructor() {
+        this.geometry = new THREE.PlaneGeometry(this.width, this.height, this.widthSegments, this.heightSegments)
+        this.material = new THREE.MeshStandardMaterial({
+            color: "white", 
+            side: THREE.DoubleSide, 
+            wireframe: false, 
+            map: texture,
+            transparent: true,
+            depthWrite: false,
+        })
+    }
+}
+
 const lineGeoParams = {
     width: 20,
     height: 0.5,
@@ -59,6 +78,9 @@ const windParams = {
     radius: null,
     direction: 30,
 }
+
+const lineFromClass = new WindLine()
+
 
 // Create the instancedMesh that will copy the lines
 const windInstance = new THREE.InstancedMesh(lineGeo, lineMat, windParams.lineDensity)

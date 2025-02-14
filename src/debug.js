@@ -3,12 +3,6 @@ import GUI from "lil-gui"
 import {Terrain} from "./terrain"
 import {windParams, windArray, lineGeo, lineMat, wind, positionLinesInInstance, addWindInstance} from "./wind/wind"
 
-/**
- * 1. Size of field
- * 2. No. of windmills
- * 3. Amount of wind
- * 4. Wind direction
- */
 
 function setUpDebugGUI() {
     const gui = new GUI()
@@ -71,24 +65,24 @@ function setUpDebugGUI() {
         })
     })
 
-    gui.add(windParams, "speed").name("Wind speed").min(0.1).max(4).step(0.1)
+    gui.add(windParams, "speed").name("Wind speed").min(0.1).max(2).step(0.1)
     
     // Number of lines per wind
-    gui.add(windParams, "lineDensity").name("Line density").min(10).max(50).step(2).onChange((value) => {
-    // Extend randomness array
-    while (windParams.randomness.length < value) {
-        windParams.randomness.push({ rndA: Math.random() - 0.5, rndB: Math.random() - 0.5, rndC: Math.random() - 0.5 });
-    }
-        windArray.forEach((windInstance, instanceIndex) => {
-            wind.remove(windInstance)
-            const newInstance = new THREE.InstancedMesh(lineGeo, lineMat, value)
+    // gui.add(windParams, "lineDensity").name("Line density").min(10).max(50).step(2).onChange((value) => {
+    // // Extend randomness array
+    // while (windParams.randomness.length < value) {
+    //     windParams.randomness.push({ rndA: Math.random() - 0.5, rndB: Math.random() - 0.5, rndC: Math.random() - 0.5 });
+    // }
+    //     windArray.forEach((windInstance, instanceIndex) => {
+    //         wind.remove(windInstance)
+    //         const newInstance = new THREE.InstancedMesh(lineGeo, lineMat, value)
 
-            positionLinesInInstance(newInstance)
+    //         positionLinesInInstance(newInstance)
 
-            windArray[instanceIndex] = newInstance
-            wind.add(newInstance)
-        })
-    })
+    //         windArray[instanceIndex] = newInstance
+    //         wind.add(newInstance)
+    //     })
+    // })
 
     gui.add(windParams, "windDensity").name("Wind density").min(1).max(10).step(1).onChange((value) => {
         addWindInstance(value)

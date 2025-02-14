@@ -18,7 +18,7 @@ function init() {
 
   // AcesHelper
   const axesHelper = new THREE.AxesHelper(4)
-  scene.add(axesHelper)
+  // scene.add(axesHelper)
 
   // Camera
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 200)
@@ -87,7 +87,7 @@ function animate(time) {
     const windAngle = THREE.MathUtils.degToRad(windParams.direction);
 
     for(let i = 0; i < windfarmParams.quantity; i++) {
-      windmills[i].children[4].rotateZ(-speed/3 * Math.cos(windAngle + 0.1))
+      windmills[i].children[4].rotateZ(-speed/5 * Math.cos(windAngle + 0.1))
     }
     animateWind(time)
     controls.update()
