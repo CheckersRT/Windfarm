@@ -2,14 +2,15 @@ import * as THREE from "three"
 import {Terrain} from "./terrain"
 import { Windmill } from "./windmill/windmill"
 
+const windmills = []
+const windfarmParams = {
+    quantity: 20,
+    bBoxArray: [],
+}
+
 function createWindfarm() {
     const terrain = new Terrain()
-    const windmills = []
     const windmillHelpers = []
-    const windfarmParams = {
-        quantity: 20,
-        bBoxArray: [],
-    }
     const bBoxSize = Windmill.baseWindmillBBoxSize
     function isPointInsideBox(x, z) {
         const newTestBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, 0, z), bBoxSize)
@@ -50,4 +51,4 @@ function createWindfarm() {
     
 }
 
-export {createWindfarm}
+export {createWindfarm, windfarmParams, windmills}

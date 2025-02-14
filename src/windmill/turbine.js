@@ -5,16 +5,18 @@ import {blade} from "./blade"
 const turBodyParams = {
     height: 1.75,
   }
-  const turBodyGeo = new THREE.CylinderGeometry(0.3, 0.3, turBodyParams.height, 10, 10)
-  const turBodyMat = new THREE.MeshBasicMaterial({color: "white"})
-  const turBodyMesh = new THREE.Mesh(turBodyGeo, turBodyMat)
-  turBodyMesh.rotation.x = Math.PI / 2
-  turBodyMesh.position.y = 10
-  
-  export {turBodyMesh as turbineBody}
+
+const turBodyGeo = new THREE.CylinderGeometry(0.3, 0.3, turBodyParams.height, 10, 10)
+const turBodyMat = new THREE.MeshBasicMaterial({color: "white"})
+const turBodyMesh = new THREE.Mesh(turBodyGeo, turBodyMat)
+turBodyMesh.rotation.x = Math.PI / 2
+turBodyMesh.position.y = 10
+
+export {turBodyMesh as turbineBody}
 
 // Turbine rotor Group
 const turRotorGroup = new THREE.Group()
+turRotorGroup.name = "turbineRotor"
 
 // Turbine rotor
 const turRotorParams = {

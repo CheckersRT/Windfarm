@@ -16,10 +16,10 @@ function setUpDebugGUI() {
     const terrain = new Terrain()
     const terrainMesh = terrain.terrain
 
-    gui.add(terrainMesh.geometry.parameters, "width").min(10).max(100).step(1).name("Area").onChange((value) => {
-        terrainMesh.geometry.dispose()
-        terrainMesh.geometry = new THREE.PlaneGeometry(value, value, value, value)
-    })
+    // gui.add(terrainMesh.geometry.parameters, "width").min(10).max(100).step(1).name("Area").onChange((value) => {
+    //     terrainMesh.geometry.dispose()
+    //     terrainMesh.geometry = new THREE.PlaneGeometry(value, value, value, value)
+    // })
 
     gui.add(windParams, "elevation").name("Wind elevation").min(0).max(15).step(1).onChange((value) => {
         windArray.forEach((windInstance) => {

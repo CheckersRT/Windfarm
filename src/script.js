@@ -6,7 +6,7 @@ import {turbineBody, turbineRotor, turbineCone, turRotorParams} from "./windmill
 import {Terrain} from "./terrain"
 import { wind, animateWind, windParams } from "./wind/wind";
 import setUpDebugGUI from "./debug";
-import { createWindfarm } from "./createWindfarm";
+import { createWindfarm, windfarmParams, windmills } from "./createWindfarm";
 
 const canvas = document.querySelector("canvas.webgl")
 
@@ -55,9 +55,7 @@ function init() {
   // Windfarm
   const {windmills, windmillHelpers} = createWindfarm()
   scene.add(...windmills)
-  scene.add(...windmillHelpers)
-
-  console.log(windmills, windmillHelpers)
+  // scene.add(...windmillHelpers)
 
   // Wind
   scene.add(wind)
@@ -66,16 +64,6 @@ function init() {
 
 init()
 
-const makeWindButton = document.querySelector(".button")
-
-makeWindButton.addEventListener("click", (event) => {
-  turRotorParams.rotate = !turRotorParams.rotate
-  if(turRotorParams.rotate === true) {
-    makeWindButton.innerHTML = "Stop wind"
-  } else {
-    makeWindButton.innerHTML = "Make wind"
-  }
-})
 
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight
@@ -95,15 +83,16 @@ window.addEventListener("dblclick", () => {
 })
 
 function animate(time) {
-  if(turRotorParams.rotate === true) {
     const speed = windParams.speed
     const windAngle = THREE.MathUtils.degToRad(windParams.direction);
-    turbineRotor.rotateZ(-speed/3 * Math.cos(windAngle + 0.1))
-  }
-  animateWind(time)
-  controls.update()
-  camera.lookAt(wind.position)
-  renderer.render(scene, camera)
+
+    for(let i = 0; i < windfarmParams.quantity; i++) {
+      windmills[i].children[4].rotateZ(-speed/3 * Math.cos(windAngle + 0.1))
+    }
+    animateWind(time)
+    controls.update()
+    camera.lookAt(wind.position)
+    renderer.render(scene, camera)
 }
 
 export {gui}
