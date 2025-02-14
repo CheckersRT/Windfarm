@@ -1,17 +1,44 @@
+import * as THREE from "three"
+import {foundation, tower} from "./tower"
+import {turbineBody, turbineCone, turbineRotor} from "./turbine"
 
+class Windmill {
+    bufferScaleFactor = 8
 
+    constructor() {
+        this.object = this.cloneWindmill(Windmill.baseWindmill)
+    }
 
-// Windmill
-const windmillParams = {
-    bufferScaleFactor: 8,
-  }
+    static createBaseWindmill() {
+        const baseWindmill = new THREE.Group()
+        baseWindmill.add(foundation, tower, turbineBody, turbineCone, turbineRotor)
+        return baseWindmill
+    }
+    static baseWindmill = Windmill.createBaseWindmill()
+    static baseWindmillBBox = new THREE.Box3().setFromObject(Windmill.baseWindmill).expandByVector(new THREE.Vector3(8, 0, 8))
+    static baseWindmillBBoxSize = Windmill.baseWindmillBBox.getSize(new THREE.Vector3())
 
-const windmill = new THREE.Group()
-windmill.add(foundation, tower, turbineBody, turbineCone, turbineRotor)
-const windmillBBox = new THREE.Box3().setFromObject(windmill).expandByScalar(windfarmParams.bufferScaleFactor)
-const helper = new THREE.Box3Helper( windmillBBox, 0xffff00 );
+    cloneWindmill(windmill) {
+        return windmill.clone()
+    }
 
-// scene.add(windmill)
+    getBBoxSize(windmill) {
+        console.log(typeof windmill, windmill)
+        return windmill.getSize(new THREE.Vector3())
+    }
 
+    createBBox(object) {
+        return new THREE.Box3().setFromObject(object).expandByVector(new THREE.Vector3(8, 0, 8))
+    }
 
-// export {windmill}
+    createHelper(box) {
+        return new THREE.Box3Helper( box, 0xffff00 )
+    }
+
+    setPosition(x, y, z) {
+        this.windmill.position.set(x, y, z)
+    }
+}
+
+export {Windmill}
+

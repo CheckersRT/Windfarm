@@ -3,9 +3,10 @@ import GUI from 'lil-gui';
 import { OrbitControls } from "three/examples/jsm/Addons.js"
 import {foundation, tower} from "./windmill/tower"
 import {turbineBody, turbineRotor, turbineCone, turRotorParams} from "./windmill/turbine"
-import {terrain, terrainParams} from "./terrain"
+import {Terrain} from "./terrain"
 import { wind, animateWind, windParams } from "./wind/wind";
 import setUpDebugGUI from "./debug";
+import { createWindfarm } from "./createWindfarm";
 
 const canvas = document.querySelector("canvas.webgl")
 
@@ -47,9 +48,16 @@ function init() {
   renderer.setAnimationLoop(animate)
 
   // Terrain
-  scene.add(terrain)
+  const terrain = new Terrain()
+  const terrainMesh = terrain.terrain
+  scene.add(terrainMesh)
   
-  
+  // Windfarm
+  const {windmills, windmillHelpers} = createWindfarm()
+  scene.add(...windmills)
+  scene.add(...windmillHelpers)
+
+  console.log(windmills, windmillHelpers)
 
   // Wind
   scene.add(wind)

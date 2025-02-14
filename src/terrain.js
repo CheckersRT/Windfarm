@@ -1,14 +1,17 @@
 import * as THREE from "three"
 
-// Terrain
-const terrainParams = {
-    width: 200,
-    height: 200,
+class Terrain {
+    width = 100
+    height = 100
+
+    constructor() {
+        this.terrainGeo = new THREE.PlaneGeometry(this.width, this.height, this.width, this.height)
+        this.terrainMat = new THREE.MeshBasicMaterial({color: "green", wireframe: false, side: THREE.DoubleSide})
+        this.terrain = new THREE.Mesh(this.terrainGeo, this.terrainMat)
+        this.terrain.rotation.x = Math.PI / 2
+    }
+
+    
 }
 
-const terrainGeo = new THREE.PlaneGeometry(terrainParams.width, terrainParams.height, terrainParams.width, terrainParams.height)
-const terrainMat = new THREE.MeshBasicMaterial({color: "green", wireframe: true, side: THREE.DoubleSide})
-const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat)
-terrainMesh.rotation.x = Math.PI / 2
-
-export {terrainMesh as terrain, terrainParams}
+export {Terrain}

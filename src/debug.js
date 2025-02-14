@@ -1,6 +1,6 @@
 import * as THREE from "three"
 import GUI from "lil-gui"
-import {terrain} from "./terrain"
+import {Terrain} from "./terrain"
 import {windParams, windArray, lineGeo, lineMat, wind, positionLinesInInstance, addWindInstance} from "./wind/wind"
 
 /**
@@ -13,9 +13,12 @@ import {windParams, windArray, lineGeo, lineMat, wind, positionLinesInInstance, 
 function setUpDebugGUI() {
     const gui = new GUI()
 
-    gui.add(terrain.geometry.parameters, "width").min(10).max(100).step(1).name("Area").onChange((value) => {
-        terrain.geometry.dispose()
-        terrain.geometry = new THREE.PlaneGeometry(value, value, value, value)
+    const terrain = new Terrain()
+    const terrainMesh = terrain.terrain
+
+    gui.add(terrainMesh.geometry.parameters, "width").min(10).max(100).step(1).name("Area").onChange((value) => {
+        terrainMesh.geometry.dispose()
+        terrainMesh.geometry = new THREE.PlaneGeometry(value, value, value, value)
     })
 
     gui.add(windParams, "elevation").name("Wind elevation").min(0).max(15).step(1).onChange((value) => {

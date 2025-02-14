@@ -1,33 +1,25 @@
 import * as THREE from "three"
-import { terrainParams } from "../terrain";
+import { Terrain } from "../terrain";
 
-/**
- * 1. Create a line
- * 
- * 
- * 1. Create a moving wind-like wave that moves from one end of the screen to the other
- * 2. Layer/multiply them to create a wind effect
- */
-
-// texture
-var canvas = document.createElement( 'CANVAS' );
+// Texture
+const canvas = document.createElement( 'CANVAS' );
     canvas.width = 64;
     canvas.height = 8;
 
-var context = canvas.getContext( '2d' );
+const context = canvas.getContext( '2d' );
 
-var gradient = context.createLinearGradient( 0, 0, 64, 0 );
+const gradient = context.createLinearGradient( 0, 0, 64, 0 );
 		gradient.addColorStop( 0.0, 'rgba(255,255,255,0)' );
 		gradient.addColorStop( 0.5, 'rgba(255,255,255,128)' );
 		gradient.addColorStop( 1.0, 'rgba(255,255,255,0)' );
 		context.fillStyle = gradient;
     context.fillRect( 0, 0, 64, 8 );
 
-var texture = new THREE.CanvasTexture( canvas );
+const texture = new THREE.CanvasTexture( canvas );
 
 const lineGeoParams = {
-    width: 7,
-    height: 0.1,
+    width: 20,
+    height: 0.5,
     widthSegments: 30,
     heightSegments: 1,
 }
@@ -44,6 +36,7 @@ const lineMat = new THREE.MeshStandardMaterial({
 })
 
 const wind = new THREE.Group()
+const terrain = new Terrain()
 const windArray = []
 const windParams = {
     stretchX: 10,
@@ -60,8 +53,8 @@ const windParams = {
     initialWindXPos: [],
     windSpreadY: 0,
     randomness: [],
-    minX: -terrainParams.width/2,
-    maxX: terrainParams.width/2,
+    minX: -terrain.width/2,
+    maxX: terrain.width/2,
     speed: 0.1,
     radius: null,
     direction: 30,
@@ -70,6 +63,8 @@ const windParams = {
 // Create the instancedMesh that will copy the lines
 const windInstance = new THREE.InstancedMesh(lineGeo, lineMat, windParams.lineDensity)
 const dummy = new THREE.Object3D()
+
+console.log(windParams.minX, windParams.maxX)
 
 // Position of lines
 function positionLinesInInstance(instance) {
