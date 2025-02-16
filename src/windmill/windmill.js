@@ -6,7 +6,7 @@ class Windmill {
     bufferScaleFactor = 8
 
     constructor() {
-        this.object = this.cloneWindmill(Windmill.baseWindmill)
+        this.object = Windmill.baseWindmill.clone()
     }
 
     static createBaseWindmill() {
@@ -17,10 +17,6 @@ class Windmill {
     static baseWindmill = Windmill.createBaseWindmill()
     static baseWindmillBBox = new THREE.Box3().setFromObject(Windmill.baseWindmill).expandByVector(new THREE.Vector3(8, 0, 8))
     static baseWindmillBBoxSize = Windmill.baseWindmillBBox.getSize(new THREE.Vector3())
-
-    cloneWindmill(windmill) {
-        return windmill.clone()
-    }
 
     getBBoxSize(windmill) {
         console.log(typeof windmill, windmill)

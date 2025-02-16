@@ -1,7 +1,7 @@
 import * as THREE from "three"
 import GUI from "lil-gui"
 import {Terrain} from "./terrain"
-import {windParams, windArray, lineGeo, lineMat, wind, positionLinesInInstance, addWindInstance} from "./wind/wind"
+import {windParams, windArray, wind, positionLinesInInstance, addWindInstance} from "./wind/wind"
 
 
 function setUpDebugGUI() {
@@ -75,7 +75,7 @@ function setUpDebugGUI() {
     // }
     //     windArray.forEach((windInstance, instanceIndex) => {
     //         wind.remove(windInstance)
-    //         const newInstance = new THREE.InstancedMesh(lineGeo, lineMat, value)
+    //         const newInstance = new THREE.InstancedMesh(, lineMat, value)
 
     //         positionLinesInInstance(newInstance)
 

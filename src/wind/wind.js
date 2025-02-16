@@ -1,6 +1,5 @@
 import * as THREE from "three"
 import { Terrain } from "../terrain";
-import { xor } from "three/tsl";
 
 // Texture
 const canvas = document.createElement( 'CANVAS' );
@@ -17,6 +16,9 @@ const gradient = context.createLinearGradient( 0, 0, 64, 0 );
     context.fillRect( 0, 0, 64, 8 );
 
 const texture = new THREE.CanvasTexture( canvas );
+
+const terrain = new Terrain()
+
 
 class WindLine {
     width = 20
@@ -42,10 +44,6 @@ class WindLine {
         this.numVerticesInRow = this.widthSegments + 1
     }
 
-    setPosition() {
-
-    }
-
     animateWave(time) {
         for (let i = 0; i < this.numVerticesInRow; i++) {
 
@@ -55,43 +53,84 @@ class WindLine {
             let bottomIndex = i + this.numVerticesInRow
             let yTop = this.linePosition.getY(topIndex)
             let yBottom = this.linePosition.getY(bottomIndex)
-            console.log("yBottom", yBottom);
 
             let z = this.amplitude * Math.cos(this.frequency * x + this.speed * time); // Smooth cosine wave
 
             this.linePosition.setXYZ(topIndex, x, yTop, z);
             this.linePosition.setXYZ(bottomIndex, x, yBottom, z);
-        }
-        // this.geometry.setAttribute("position", this.linePosition);
-    
+        }    
         this.linePosition.needsUpdate = true
     }
 }
 
+class WindInstance extends THREE.Object3D {
+    windArray = []
+    stretchX = 10
+    windDensity = 10
+    elevation = 8
+    lineSpacingX = 1
+    initialLineXPos = []
+    lineSpacingY = 2
+    initialLineYPos = []
+    lineSpacingZ = 3
+    initialLineZPos = []
+    windSpreadX = 10
+    initialWindXPos = []
+    windSpreadY = 0
+    randomness = []
+    minX = -terrain.width/2
+    maxX = terrain.width/2
+    speed = 0.1
+    radius = null
+    direction = 30
 
+    constructor() {
+        super()
+        this.mesh = WindInstance.baseWind.clone()
+        this.lineDensity = WindInstance.lineDensity
+        }
 
-const lineGeoParams = {
-    width: 20,
-    height: 0.5,
-    widthSegments: 30,
-    heightSegments: 1,
+    static lineDensity = 10
+    static baseLine = new WindLine()
+    static baseWind = new THREE.InstancedMesh(WindInstance.baseLine.geometry, WindInstance.baseLine.material, WindInstance.lineDensity)  
 }
 
-// Create a single wind line
-const lineGeo = new THREE.PlaneGeometry(lineGeoParams.width, lineGeoParams.height, lineGeoParams.widthSegments, lineGeoParams.heightSegments)
-const lineMat = new THREE.MeshStandardMaterial({
-    color: "white", 
-    side: THREE.DoubleSide, 
-    wireframe: false, 
-    map: texture,
-    transparent: true,
-    depthWrite: false,
-})
+class Wind extends THREE.Group {
+    constructor(density = 5) {
+        super()
+        this.createWind(density)
+    }
+    createWind(density) {
+        for (let i = 0; i < density; i++) {
+            const windInstance = new WindInstance()
+            this.add(windInstance.mesh)
+        }
+    }
+    addWind() {
+        const windInstance = new WindInstance()
+        this.add(windInstance.mesh)
+    }
+    removeWind() {
+        this.remove(this.children[this.children.length-1])
+    }
+    addToScene() {}
 
-console.log("lineGeo", lineGeo, "from class", new WindLine().geometry)
+}
+
+function windFactory(instances) {
+    const wind = new THREE.Group()
+    const windArray = []
+    for (let i = 0; i < instances; i++) {
+        const newWind = new WindInstance()
+        windArray.push(newWind)
+    }
+    wind.add(...windArray)
+    return wind
+}
 
 const wind = new THREE.Group()
-const terrain = new Terrain()
+console.log("wind", wind)
+// new THREE.InstancedMesh(windLine.geometry, windLine.material, windParams.lineDensity)
 const windArray = []
 const windParams = {
     stretchX: 10,
@@ -115,12 +154,7 @@ const windParams = {
     direction: 30,
 }
 
-const lineFromClass = new WindLine()
-
-
-// Create the instancedMesh that will copy the lines
-const windInstance = new THREE.InstancedMesh(lineFromClass.geometry, lineFromClass.material, windParams.lineDensity)
-const windInstance2 = new THREE.InstancedMesh(lineGeo, lineMat, windParams.lineDensity)
+const {mesh: windInstance} = new WindInstance()
 const dummy = new THREE.Object3D()
 
 // Position of lines
@@ -188,39 +222,8 @@ function addWindInstance(quantity) {
 }
 addWindInstance(windParams.windDensity)
 
-for(let i = 0; i < windArray.length; i++) {    
-    wind.add(windArray[i])
-}
 
-const amplitude = 0.2; // Controls height of wave
-const frequency = 2;   // Controls how tight the waves are
-const speed = 6;       // Controls how fast the wave moves
-
-const numColumns = lineGeoParams.widthSegments + 1; // (widthSegments + 1)
-const lineGeoPos = lineGeo.getAttribute("position")
-
-function animateLineWaves(time) {
-    
-    for (let i = 0; i < numColumns; i++) {
-
-        let x = lineGeoPos.getX(i)
-
-        // Get top and bottom index of plane so the both sides of the wave move together
-        let topIndex = i
-        let bottomIndex = i + numColumns
-        let yTop = lineGeoPos.getY(topIndex)
-        let yBottom = lineGeoPos.getY(bottomIndex)
-        let z = amplitude * Math.cos(frequency * x + speed * time); // Smooth cosine wave
-        
-        // Apply the same z position to both top and bottom vertices
-        lineGeoPos.setXYZ(topIndex, x, yTop, z);
-        lineGeoPos.setXYZ(bottomIndex, x, yBottom, z);
-        
-    }
-    lineGeo.setAttribute("position", lineGeoPos);
-
-    lineGeoPos.needsUpdate = true
-}
+wind.add(...windArray)
 
 function animateLines(time, windInstance) {
     for (let i = 0; i < windInstance.count; i++) {
@@ -289,14 +292,10 @@ function animateSpeed(deltaTime, windInstance) {
         windInstance.instanceMatrix.needsUpdate = true
 }
 
-const windLine = new WindLine()
-
 function animateWind(time) {
     time = time / 1000; 
-
-    console.log(windLine);
     
-    windLine.animateWave(time)
+    WindInstance.baseLine.animateWave(time)
     // animateLineWaves(time)
     
     for(let i = 0; i < windArray.length; i++) {
@@ -308,4 +307,4 @@ function animateWind(time) {
 
 }
 
-export {wind, animateWind, windParams, windArray, lineGeo, lineMat, positionLinesInInstance, addWindInstance}
+export {wind, animateWind, windParams, windArray, positionLinesInInstance, addWindInstance, windInstance}

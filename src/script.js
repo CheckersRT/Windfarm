@@ -4,9 +4,9 @@ import { OrbitControls } from "three/examples/jsm/Addons.js"
 import {foundation, tower} from "./windmill/tower"
 import {turbineBody, turbineRotor, turbineCone, turRotorParams} from "./windmill/turbine"
 import {Terrain} from "./terrain"
-import { wind, animateWind, windParams } from "./wind/wind";
+import { wind, animateWind, windParams, windInstance } from "./wind/wind";
 import setUpDebugGUI from "./debug";
-import { createWindfarm, windfarmParams, windmills } from "./createWindfarm";
+import { createWindfarm as createWindmills, windfarmParams, windmills } from "./createWindfarm";
 
 const canvas = document.querySelector("canvas.webgl")
 
@@ -53,11 +53,12 @@ function init() {
   scene.add(terrainMesh)
   
   // Windfarm
-  const {windmills, windmillHelpers} = createWindfarm()
+  const {windmills, windmillHelpers} = createWindmills()
   scene.add(...windmills)
   // scene.add(...windmillHelpers)
 
   // Wind
+  // const {wind} = createWind()
   scene.add(wind)
 
 }
