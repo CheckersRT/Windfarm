@@ -1,5 +1,6 @@
 import * as THREE from "three"
 import { Terrain } from "../terrain";
+import { xor } from "three/tsl";
 
 // Texture
 const canvas = document.createElement( 'CANVAS' );
@@ -22,6 +23,9 @@ class WindLine {
     height = 0.5
     widthSegments = 30
     heightSegments = 1
+    amplitude = 0.2; // Controls height of wave
+    frequency = 2;   // Controls how tight the waves are
+    speed = 6;       // Controls how fast the wave moves    
 
     constructor() {
         this.geometry = new THREE.PlaneGeometry(this.width, this.height, this.widthSegments, this.heightSegments)
@@ -33,8 +37,38 @@ class WindLine {
             transparent: true,
             depthWrite: false,
         })
+        // this.geometry.rotateX(Math.PI / 2)
+        this.linePosition = this.geometry.getAttribute("position")
+        this.numVerticesInRow = this.widthSegments + 1
+    }
+
+    setPosition() {
+
+    }
+
+    animateWave(time) {
+        for (let i = 0; i < this.numVerticesInRow; i++) {
+
+            let x = this.linePosition.getX(i)            
+            // Get top and bottom index of plane so the both sides of the wave move together
+            let topIndex = i
+            let bottomIndex = i + this.numVerticesInRow
+            let yTop = this.linePosition.getY(topIndex)
+            let yBottom = this.linePosition.getY(bottomIndex)
+            console.log("yBottom", yBottom);
+
+            let z = this.amplitude * Math.cos(this.frequency * x + this.speed * time); // Smooth cosine wave
+
+            this.linePosition.setXYZ(topIndex, x, yTop, z);
+            this.linePosition.setXYZ(bottomIndex, x, yBottom, z);
+        }
+        // this.geometry.setAttribute("position", this.linePosition);
+    
+        this.linePosition.needsUpdate = true
     }
 }
+
+
 
 const lineGeoParams = {
     width: 20,
@@ -53,6 +87,8 @@ const lineMat = new THREE.MeshStandardMaterial({
     transparent: true,
     depthWrite: false,
 })
+
+console.log("lineGeo", lineGeo, "from class", new WindLine().geometry)
 
 const wind = new THREE.Group()
 const terrain = new Terrain()
@@ -83,10 +119,9 @@ const lineFromClass = new WindLine()
 
 
 // Create the instancedMesh that will copy the lines
-const windInstance = new THREE.InstancedMesh(lineGeo, lineMat, windParams.lineDensity)
+const windInstance = new THREE.InstancedMesh(lineFromClass.geometry, lineFromClass.material, windParams.lineDensity)
+const windInstance2 = new THREE.InstancedMesh(lineGeo, lineMat, windParams.lineDensity)
 const dummy = new THREE.Object3D()
-
-console.log(windParams.minX, windParams.maxX)
 
 // Position of lines
 function positionLinesInInstance(instance) {
@@ -164,16 +199,19 @@ const speed = 6;       // Controls how fast the wave moves
 const numColumns = lineGeoParams.widthSegments + 1; // (widthSegments + 1)
 const lineGeoPos = lineGeo.getAttribute("position")
 
-function animateWave(time) {
+function animateLineWaves(time) {
+    
     for (let i = 0; i < numColumns; i++) {
 
         let x = lineGeoPos.getX(i)
+
         // Get top and bottom index of plane so the both sides of the wave move together
         let topIndex = i
         let bottomIndex = i + numColumns
         let yTop = lineGeoPos.getY(topIndex)
         let yBottom = lineGeoPos.getY(bottomIndex)
         let z = amplitude * Math.cos(frequency * x + speed * time); // Smooth cosine wave
+        
         // Apply the same z position to both top and bottom vertices
         lineGeoPos.setXYZ(topIndex, x, yTop, z);
         lineGeoPos.setXYZ(bottomIndex, x, yBottom, z);
@@ -251,10 +289,15 @@ function animateSpeed(deltaTime, windInstance) {
         windInstance.instanceMatrix.needsUpdate = true
 }
 
+const windLine = new WindLine()
 
 function animateWind(time) {
     time = time / 1000; 
-    animateWave(time)
+
+    console.log(windLine);
+    
+    windLine.animateWave(time)
+    // animateLineWaves(time)
     
     for(let i = 0; i < windArray.length; i++) {
         animateLines(time, windArray[i])
