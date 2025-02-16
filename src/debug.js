@@ -1,7 +1,7 @@
 import * as THREE from "three"
 import GUI from "lil-gui"
 import {Terrain} from "./terrain"
-import {windParams, windArray, wind, positionLinesInInstance, addWindInstance} from "./wind/wind"
+import {windParams} from "./wind/wind"
 
 
 function setUpDebugGUI() {

@@ -4,13 +4,13 @@ import { OrbitControls } from "three/examples/jsm/Addons.js"
 import {foundation, tower} from "./windmill/tower"
 import {turbineBody, turbineRotor, turbineCone, turRotorParams} from "./windmill/turbine"
 import {Terrain} from "./terrain"
-import { wind, animateWind, windParams, windInstance } from "./wind/wind";
+import { windParams, Wind, WindInstance } from "./wind/wind";
 import setUpDebugGUI from "./debug";
 import { createWindfarm as createWindmills, windfarmParams, windmills } from "./createWindfarm";
 
 const canvas = document.querySelector("canvas.webgl")
 
-let camera, scene, renderer, controls, gui
+let camera, scene, renderer, controls, gui, wind
 
 function init() {
   scene = new THREE.Scene()
@@ -58,7 +58,7 @@ function init() {
   // scene.add(...windmillHelpers)
 
   // Wind
-  // const {wind} = createWind()
+  wind = new Wind(5)
   scene.add(wind)
 
 }
@@ -84,13 +84,16 @@ window.addEventListener("dblclick", () => {
 })
 
 function animate(time) {
+    time = time / 1000
     const speed = windParams.speed
     const windAngle = THREE.MathUtils.degToRad(windParams.direction);
 
     for(let i = 0; i < windfarmParams.quantity; i++) {
       windmills[i].children[4].rotateZ(-speed/5 * Math.cos(windAngle + 0.1))
     }
-    animateWind(time)
+
+    wind.animate(time)
+    WindInstance.baseLine.animateWave(time)
     controls.update()
     camera.lookAt(wind.position)
     renderer.render(scene, camera)

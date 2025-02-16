@@ -20,7 +20,7 @@ const texture = new THREE.CanvasTexture( canvas );
 const terrain = new Terrain()
 
 
-class WindLine {
+class WindLine extends THREE.Object3D {
     width = 20
     height = 0.5
     widthSegments = 30
@@ -30,6 +30,7 @@ class WindLine {
     speed = 6;       // Controls how fast the wave moves    
 
     constructor() {
+        super()
         this.geometry = new THREE.PlaneGeometry(this.width, this.height, this.widthSegments, this.heightSegments)
         this.material = new THREE.MeshStandardMaterial({
             color: "white", 
@@ -83,19 +84,116 @@ class WindInstance extends THREE.Object3D {
     speed = 0.1
     radius = null
     direction = 30
+    dummy = new THREE.Object3D()
 
     constructor() {
         super()
         this.mesh = WindInstance.baseWind.clone()
         this.lineDensity = WindInstance.lineDensity
+        this.positionLines(this.mesh)
+        this.radius = this.getRadius()
         }
 
     static lineDensity = 10
     static baseLine = new WindLine()
     static baseWind = new THREE.InstancedMesh(WindInstance.baseLine.geometry, WindInstance.baseLine.material, WindInstance.lineDensity)  
+
+    getRadius() {
+        this.mesh.computeBoundingSphere()
+        return this.mesh.boundingSphere.radius
+    }
+
+    positionLines(mesh) {
+        for(let i = 0; i < mesh.count; i++) {
+            this.randomness.push({ rndA: Math.random() - 0.5, rndB: Math.random() - 0.5, rndC: Math.random() - 0.5 });
+            
+            let {rndA, rndB, rndC} = this.randomness[i]
+            
+            this.dummy.position.set(
+                rndA * 10, 
+                rndB * 4,
+                rndC * 10,
+            )
+            this.dummy.rotation.set(Math.PI / 2, 0 , 0)
+            this.initialLineXPos.push(this.dummy.position.x)
+            this.initialLineYPos.push(this.dummy.position.y)
+            this.initialLineZPos.push(this.dummy.position.z)
+            this.dummy.updateMatrix()
+            mesh.setMatrixAt(i, this.dummy.matrix)
+        }
+        mesh.position.y = windParams.elevation
+        mesh.instanceMatrix.needsUpdate = true;
+    }
+
+    animateLines(time) {
+        for (let i = 0; i < this.mesh.count; i++) {
+    
+            let { rndA, rndB } = this.randomness[i];
+        
+            this.mesh.getMatrixAt(i, this.dummy.matrix)
+            this.dummy.matrix.decompose(this.dummy.position, this.dummy.quaternion, this.dummy.scale)
+            let {x, y, z} = this.dummy.position
+    
+            // Modify position based on a cosine wave
+            let zOffset = Math.cos(time * 2 + rndA) * 0.02; // Small wave motion
+            let yOffset = Math.sin(time * 3 + rndB) * 0.02; // Slight vertical sway
+    
+            this.dummy.position.set(x, y + yOffset, z + zOffset);
+            this.dummy.updateMatrix();
+            this.mesh.setMatrixAt(i, this.dummy.matrix);
+        } 
+        this.mesh.instanceMatrix.needsUpdate = true; // Update the instances
+    }
+
+    animateSpeed() {
+        // Convert angle from degrees to radians
+        const angleRad = THREE.MathUtils.degToRad(this.direction);
+
+        // Move the wind instance in the direction of the angle
+        this.mesh.position.x += Math.cos(angleRad) * this.speed;
+        this.mesh.position.z += Math.sin(angleRad) * this.speed;
+
+        for(let i = 0; i < this.mesh.count; i++) {
+            this.mesh.getMatrixAt(i, this.dummy.matrix)
+            this.dummy.matrix.decompose(this.dummy.position, this.dummy.quaternion, this.dummy.scale)
+
+            this.dummy.rotation.z = angleRad
+            this.dummy.updateMatrix()
+            this.mesh.setMatrixAt(i, this.dummy.matrix)
+        }
+        this.mesh.instanceMatrix.needsUpdate = true
+    }
+
+    loop() {
+        const angleRad = THREE.MathUtils.degToRad(this.direction);
+    
+        const moveX = Math.cos(angleRad);
+        const moveZ = Math.sin(angleRad);
+    
+        for (let i = 0; i < this.mesh.count; i++) {
+            let { x, z } = this.mesh.position;
+    
+            // Project onto the movement axis to check loop conditions
+            let projectedPos = x * moveX + z * moveZ;
+    
+            if (projectedPos > this.maxX + this.radius) {
+                // Move to the start position but maintain the same offset along the wind's movement axis
+                this.mesh.position.x -= moveX * (this.maxX - this.minX + 2 * this.radius);
+                this.mesh.position.z -= moveZ * (this.maxX - this.minX + 2 * this.radius);
+            } 
+    
+            if (projectedPos < this.minX - this.radius) {
+                // Move to the end position, maintaining offset
+                this.mesh.position.x += moveX * (this.maxX - this.minX + 2 * this.radius);
+                this.mesh.position.z += moveZ * (this.maxX - this.minX + 2 * this.radius);
+            }
+        }
+    }
 }
 
 class Wind extends THREE.Group {
+    array = []
+
     constructor(density = 5) {
         super()
         this.createWind(density)
@@ -104,6 +202,7 @@ class Wind extends THREE.Group {
         for (let i = 0; i < density; i++) {
             const windInstance = new WindInstance()
             this.add(windInstance.mesh)
+            this.array.push(windInstance)
         }
     }
     addWind() {
@@ -113,25 +212,18 @@ class Wind extends THREE.Group {
     removeWind() {
         this.remove(this.children[this.children.length-1])
     }
+
+    animate(time) {
+        this.array.forEach((windInstance) => {
+            windInstance.animateLines(time)
+            windInstance.animateSpeed()
+            windInstance.loop(time)
+        })
+    }
     addToScene() {}
 
 }
 
-function windFactory(instances) {
-    const wind = new THREE.Group()
-    const windArray = []
-    for (let i = 0; i < instances; i++) {
-        const newWind = new WindInstance()
-        windArray.push(newWind)
-    }
-    wind.add(...windArray)
-    return wind
-}
-
-const wind = new THREE.Group()
-console.log("wind", wind)
-// new THREE.InstancedMesh(windLine.geometry, windLine.material, windParams.lineDensity)
-const windArray = []
 const windParams = {
     stretchX: 10,
     lineDensity: 15,
@@ -154,157 +246,5 @@ const windParams = {
     direction: 30,
 }
 
-const {mesh: windInstance} = new WindInstance()
-const dummy = new THREE.Object3D()
 
-// Position of lines
-function positionLinesInInstance(instance) {
-    const dummy = new THREE.Object3D()
-
-    for(let i = 0; i < instance.count; i++) {
-        windParams.randomness.push({ rndA: Math.random() - 0.5, rndB: Math.random() - 0.5, rndC: Math.random() - 0.5 });
-        
-        let {rndA, rndB, rndC} = windParams.randomness[i]
-        
-        dummy.position.set(
-            rndA * 10, 
-            rndB * 4,
-            rndC * 10,
-        )
-        dummy.rotation.set(Math.PI / 2, 0 , 0)
-        windParams.initialLineXPos.push(dummy.position.x)
-        windParams.initialLineYPos.push(dummy.position.y)
-        windParams.initialLineZPos.push(dummy.position.z)
-        dummy.updateMatrix()
-        instance.setMatrixAt(i, dummy.matrix)
-    }
-    instance.position.y = windParams.elevation
-    // instance.rotation.y = 1
-    instance.instanceMatrix.needsUpdate = true;
-}
-windInstance.computeBoundingSphere()
-windParams.radius = windInstance.boundingSphere.radius
-
-positionLinesInInstance(windInstance)
-// windArray.push(instancedLines)
-
-// Position of wind instance
-
-const addWind = (quantity, currentWDensity) => {
-    const numNewWind = quantity - currentWDensity
-    for (let i = 0; i < numNewWind; i++) {
-        const newInstance = windInstance.clone()
-        
-        newInstance.position.x = i * -15
-        newInstance.instanceMatrix.needsUpdate = true;
-        
-        windArray.push(newInstance)
-        wind.add(newInstance)
-    }
-}
-const removeWind = (quantity, currentWDensity) => {
-    const numToRemove = currentWDensity - quantity
-    for (let i = 0; i < numToRemove; i++) {
-        wind.remove(windArray[windArray.length-1])
-        windArray.pop()
-    }
-}
-function addWindInstance(quantity) {
-
-    const currentWDensity = windArray.length
-    if(quantity > currentWDensity) {
-        addWind(quantity, currentWDensity)
-    } else {
-        removeWind(quantity, currentWDensity)
-    }
-
-
-}
-addWindInstance(windParams.windDensity)
-
-
-wind.add(...windArray)
-
-function animateLines(time, windInstance) {
-    for (let i = 0; i < windInstance.count; i++) {
-
-        let { rndA, rndB } = windParams.randomness[i];
-    
-        windInstance.getMatrixAt(i, dummy.matrix)
-        dummy.matrix.decompose(dummy.position, dummy.quaternion, dummy.scale)
-        let {x, y, z} = dummy.position
-
-        // Modify position based on a cosine wave
-        let zOffset = Math.cos(time * 2 + rndA) * 0.02; // Small wave motion
-        let yOffset = Math.sin(time * 3 + rndB) * 0.02; // Slight vertical sway
-
-        dummy.position.set(x, y + yOffset, z + zOffset);
-        dummy.updateMatrix();
-        windInstance.setMatrixAt(i, dummy.matrix);
-    } 
-    windInstance.instanceMatrix.needsUpdate = true; // Update the instances
-}
-
-function loop(windInstance) {
-
-    const angleRad = THREE.MathUtils.degToRad(windParams.direction);
-
-    const moveX = Math.cos(angleRad);
-    const moveZ = Math.sin(angleRad);
-
-    for (let i = 0; i < windInstance.count; i++) {
-        let { x, z } = windInstance.position;
-
-        // Project onto the movement axis to check loop conditions
-        let projectedPos = x * moveX + z * moveZ;
-
-        if (projectedPos > windParams.maxX + windParams.radius) {
-            // Move to the start position but maintain the same offset along the wind's movement axis
-            windInstance.position.x -= moveX * (windParams.maxX - windParams.minX + 2 * windParams.radius);
-            windInstance.position.z -= moveZ * (windParams.maxX - windParams.minX + 2 * windParams.radius);
-        } 
-
-        if (projectedPos < windParams.minX - windParams.radius) {
-            // Move to the end position, maintaining offset
-            windInstance.position.x += moveX * (windParams.maxX - windParams.minX + 2 * windParams.radius);
-            windInstance.position.z += moveZ * (windParams.maxX - windParams.minX + 2 * windParams.radius);
-        }
-    }
-}
-
-function animateSpeed(deltaTime, windInstance) {
-        // Convert angle from degrees to radians
-        const angleRad = THREE.MathUtils.degToRad(windParams.direction);
-
-        // Move the wind instance in the direction of the angle
-        windInstance.position.x += Math.cos(angleRad) * windParams.speed;
-        windInstance.position.z += Math.sin(angleRad) * windParams.speed;
-
-        const dummy = new THREE.Object3D()
-        for(let i = 0; i < windInstance.count; i++) {
-            windInstance.getMatrixAt(i, dummy.matrix)
-            dummy.matrix.decompose(dummy.position, dummy.quaternion, dummy.scale)
-
-            dummy.rotation.z = angleRad
-            dummy.updateMatrix()
-            windInstance.setMatrixAt(i, dummy.matrix)
-        }
-        windInstance.instanceMatrix.needsUpdate = true
-}
-
-function animateWind(time) {
-    time = time / 1000; 
-    
-    WindInstance.baseLine.animateWave(time)
-    // animateLineWaves(time)
-    
-    for(let i = 0; i < windArray.length; i++) {
-        animateLines(time, windArray[i])
-        animateSpeed(time, windArray[i])
-        loop(windArray[i])
-    }
-
-
-}
-
-export {wind, animateWind, windParams, windArray, positionLinesInInstance, addWindInstance, windInstance}
+export { windParams, Wind, WindInstance}
