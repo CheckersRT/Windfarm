@@ -43,6 +43,7 @@ class WindLine extends THREE.Object3D {
         // this.geometry.rotateX(Math.PI / 2)
         this.linePosition = this.geometry.getAttribute("position")
         this.numVerticesInRow = this.widthSegments + 1
+        
     }
 
     animateWave(time) {
@@ -121,11 +122,11 @@ class WindInstance extends THREE.Object3D {
             this.dummy.updateMatrix()
             mesh.setMatrixAt(i, this.dummy.matrix)
         }
-        mesh.position.y = windParams.elevation
+        mesh.position.y = this.elevation
         mesh.instanceMatrix.needsUpdate = true;
     }
 
-    animateLines(time) {
+    animateLinePosition(time) {
         for (let i = 0; i < this.mesh.count; i++) {
     
             let { rndA, rndB } = this.randomness[i];
@@ -145,7 +146,11 @@ class WindInstance extends THREE.Object3D {
         this.mesh.instanceMatrix.needsUpdate = true; // Update the instances
     }
 
-    animateSpeed() {
+    animateLineWave(time) {
+        WindInstance.baseLine.animateWave(time)
+    }
+
+    animateDirection() {
         // Convert angle from degrees to radians
         const angleRad = THREE.MathUtils.degToRad(this.direction);
 
@@ -215,8 +220,9 @@ class Wind extends THREE.Group {
 
     animate(time) {
         this.array.forEach((windInstance) => {
-            windInstance.animateLines(time)
-            windInstance.animateSpeed()
+            windInstance.animateLinePosition(time)
+            windInstance.animateDirection()
+            windInstance.animateLineWave(time)
             windInstance.loop(time)
         })
     }

@@ -1,16 +1,13 @@
 import * as THREE from "three"
-import GUI from 'lil-gui';
 import { OrbitControls } from "three/examples/jsm/Addons.js"
-import {foundation, tower} from "./windmill/tower"
-import {turbineBody, turbineRotor, turbineCone, turRotorParams} from "./windmill/turbine"
 import {Terrain} from "./terrain"
-import { windParams, Wind, WindInstance } from "./wind/wind";
+import { Wind } from "./wind/wind";
 import setUpDebugGUI from "./debug";
-import { createWindfarm as createWindmills, windfarmParams, windmills } from "./createWindfarm";
+import { WindFarm } from "./windfarm";
 
 const canvas = document.querySelector("canvas.webgl")
 
-let camera, scene, renderer, controls, gui, wind
+let camera, scene, renderer, controls, gui, wind, windfarm
 
 function init() {
   scene = new THREE.Scene()
@@ -53,9 +50,11 @@ function init() {
   scene.add(terrainMesh)
   
   // Windfarm
-  const {windmills, windmillHelpers} = createWindmills()
-  scene.add(...windmills)
-  // scene.add(...windmillHelpers)
+  windfarm = new WindFarm(20)
+  console.log(windfarm);
+  
+  scene.add(windfarm)
+  scene.add(...windfarm.helpers)
 
   // Wind
   wind = new Wind(5)
@@ -85,15 +84,8 @@ window.addEventListener("dblclick", () => {
 
 function animate(time) {
     time = time / 1000
-    const speed = windParams.speed
-    const windAngle = THREE.MathUtils.degToRad(windParams.direction);
-
-    for(let i = 0; i < windfarmParams.quantity; i++) {
-      windmills[i].children[4].rotateZ(-speed/5 * Math.cos(windAngle + 0.1))
-    }
-
+    windfarm.animate()  
     wind.animate(time)
-    WindInstance.baseLine.animateWave(time)
     controls.update()
     camera.lookAt(wind.position)
     renderer.render(scene, camera)

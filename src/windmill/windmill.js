@@ -1,12 +1,15 @@
 import * as THREE from "three"
 import {foundation, tower} from "./tower"
 import {turbineBody, turbineCone, turbineRotor} from "./turbine"
+import Controller from "../controller"
 
 class Windmill {
     bufferScaleFactor = 8
 
     constructor() {
         this.object = Windmill.baseWindmill.clone()
+        this.boundingBox = this.createBBox(this.object)
+        this.helper = this.createHelper(this.boundingBox)
     }
 
     static createBaseWindmill() {
@@ -18,9 +21,8 @@ class Windmill {
     static baseWindmillBBox = new THREE.Box3().setFromObject(Windmill.baseWindmill).expandByVector(new THREE.Vector3(8, 0, 8))
     static baseWindmillBBoxSize = Windmill.baseWindmillBBox.getSize(new THREE.Vector3())
 
-    getBBoxSize(windmill) {
-        console.log(typeof windmill, windmill)
-        return windmill.getSize(new THREE.Vector3())
+    getBBoxSize() {
+        return this.boundingBox.getSize(new THREE.Vector3())
     }
 
     createBBox(object) {
@@ -32,7 +34,14 @@ class Windmill {
     }
 
     setPosition(x, y, z) {
-        this.windmill.position.set(x, y, z)
+        this.object.position.set(x, y, z)
+    }
+
+    animateRotation() {
+        const controller = new Controller()
+        const speed = controller.windSpeed
+        const windAngle = THREE.MathUtils.degToRad(controller.windDirection);
+        this.object.children[4].rotateZ(-speed/5 * Math.cos(windAngle * Math.random() + 0.1))
     }
 }
 
