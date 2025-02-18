@@ -1,12 +1,15 @@
 import * as THREE from "three"
 import {foundation, tower} from "./tower"
 import {turbineBody, turbineCone, turbineRotor} from "./turbine"
+import Controller from "../controller"
 
 class Windmill {
-    bufferScaleFactor = 8
+    bBoxScaleVector = new THREE.Vector3(8, 0, 8)
 
     constructor() {
-        this.object = this.cloneWindmill(Windmill.baseWindmill)
+        this.object = Windmill.baseWindmill.clone()
+        this.boundingBox = this.createBBox()
+        this.helper = this.createHelper()
     }
 
     static createBaseWindmill() {
@@ -15,28 +18,32 @@ class Windmill {
         return baseWindmill
     }
     static baseWindmill = Windmill.createBaseWindmill()
-    static baseWindmillBBox = new THREE.Box3().setFromObject(Windmill.baseWindmill).expandByVector(new THREE.Vector3(8, 0, 8))
-    static baseWindmillBBoxSize = Windmill.baseWindmillBBox.getSize(new THREE.Vector3())
 
-    cloneWindmill(windmill) {
-        return windmill.clone()
+    getBBoxSize() {
+        return this.boundingBox.getSize(new THREE.Vector3())
     }
 
-    getBBoxSize(windmill) {
-        console.log(typeof windmill, windmill)
-        return windmill.getSize(new THREE.Vector3())
+    createBBox() {
+        return new THREE.Box3().setFromObject(this.object).expandByVector(this.bBoxScaleVector)
     }
 
-    createBBox(object) {
-        return new THREE.Box3().setFromObject(object).expandByVector(new THREE.Vector3(8, 0, 8))
-    }
-
-    createHelper(box) {
-        return new THREE.Box3Helper( box, 0xffff00 )
+    createHelper() {
+        return new THREE.Box3Helper( this.boundingBox, 0xffff00 )
     }
 
     setPosition(x, y, z) {
-        this.windmill.position.set(x, y, z)
+        this.object.position.set(x, y, z)
+    }
+
+    setBBoxPosition() {
+        this.boundingBox.setFromObject(this.object).expandByVector(this.bBoxScaleVector)
+    }
+
+    animateRotation() {
+        const controller = new Controller()
+        const speed = controller.windSpeed
+        const windAngle = THREE.MathUtils.degToRad(controller.windDirection);
+        this.object.children[4].rotateZ(-speed/5 * Math.cos(windAngle * Math.random() + 0.1))
     }
 }
 

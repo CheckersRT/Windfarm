@@ -1,16 +1,14 @@
 import * as THREE from "three"
-import GUI from 'lil-gui';
 import { OrbitControls } from "three/examples/jsm/Addons.js"
-import {foundation, tower} from "./windmill/tower"
-import {turbineBody, turbineRotor, turbineCone, turRotorParams} from "./windmill/turbine"
+import { DragControls } from 'three/addons/controls/DragControls.js';
 import {Terrain} from "./terrain"
-import { wind, animateWind, windParams } from "./wind/wind";
+import { Wind } from "./wind/wind";
 import setUpDebugGUI from "./debug";
-import { createWindfarm, windfarmParams, windmills } from "./createWindfarm";
+import { WindFarm } from "./windfarm";
 
 const canvas = document.querySelector("canvas.webgl")
 
-let camera, scene, renderer, controls, gui
+let camera, scene, renderer, controls, dragControls, gui, wind, windfarm
 
 function init() {
   scene = new THREE.Scene()
@@ -29,7 +27,7 @@ function init() {
 
   // Controls
   controls = new OrbitControls(camera, canvas)
-  // controls.enabled = false
+  controls.enabled = false
   controls.enableDamping = true
   controls.update()
 
@@ -53,13 +51,22 @@ function init() {
   scene.add(terrainMesh)
   
   // Windfarm
-  const {windmills, windmillHelpers} = createWindfarm()
-  scene.add(...windmills)
-  // scene.add(...windmillHelpers)
+  windfarm = new WindFarm(20)
+  console.log(windfarm);
+  
+  scene.add(windfarm)
+  scene.add(...windfarm.helpers)
 
   // Wind
+  wind = new Wind(1)
   scene.add(wind)
 
+  // Drag controls
+  const windmillObjs = windfarm.windmills.map((windmill) => (windmill.object))
+  console.log("windmillObjs", windmillObjs);
+  
+  dragControls = new DragControls(windmillObjs, camera, canvas)
+  dragControls.recursive = false
 }
 
 init()
@@ -83,13 +90,9 @@ window.addEventListener("dblclick", () => {
 })
 
 function animate(time) {
-    const speed = windParams.speed
-    const windAngle = THREE.MathUtils.degToRad(windParams.direction);
-
-    for(let i = 0; i < windfarmParams.quantity; i++) {
-      windmills[i].children[4].rotateZ(-speed/5 * Math.cos(windAngle + 0.1))
-    }
-    animateWind(time)
+    time = time / 1000
+    windfarm.animate()  
+    wind.animate(time)
     controls.update()
     camera.lookAt(wind.position)
     renderer.render(scene, camera)
