@@ -14,21 +14,34 @@ class WindFarm extends THREE.Group {
     }
 
     createWindFarm(quantity) {
+        this.quantity = quantity
         for (let i = 0; i < quantity; i++) {
-            const windmill = new Windmill()
-            console.log(windmill);
-            
-            const {x, z} = this.findSafePosition(windmill)
-            windmill.setPosition(x, 0, z)
-            this.addWindmillToFarm(windmill)
-            this.helpers.push(windmill.helper)
-            this.boundingBoxes.push(windmill.boundingBox)
+            this.addNew()
         }
     }
 
-    addWindmillToFarm(windmill) {
+    createWindmill() {
+        return new Windmill()
+    }
+
+    addNew() {
+        const windmill = this.createWindmill()
+        const {safe, x, z} = this.findSafePosition(windmill)
+        if(!safe) {
+            console.warn("Too bad, not enough room for anymore windmills.")
+            return
+        } 
+        windmill.setPosition(x, 0, z)
+        windmill.setBBoxPosition()
+        this.addToFarm(windmill, windmill.boundingBox, windmill.helper)
+    }
+
+    addToFarm(windmill, boundingBox?, helper?) {
         this.windmills.push(windmill)
         this.add(windmill.object)
+        this.boundingBoxes.push(boundingBox)
+        this.helpers.push(helper)
+
     }
     removeWindmill() {
 
@@ -46,15 +59,16 @@ class WindFarm extends THREE.Group {
             z = (Math.random() - 0.5) * terrain.width
             isSafeDistAway = this.doesBoxIntersect(windmill, x, z)
             attempts++
-            if (attempts >= 50) {
-                console.log("You can't place any more windmills in this space. Expand the area to place more.");
-                break
-            }    
         }
-        return {x, z}
+        if (attempts >= 50) {
+            console.log("You can't place any more windmills in this space. Expand the area to place more.");
+            return {safe: false, x: 0, z: 0}
+        }    
+
+        return {safe: true, x, z}
     }
     doesBoxIntersect(windmill: Windmill, x, z) {
-        const newTestBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, 0, z), windmill.getBBoxSize())
+        const newTestBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(x, 0, z), windmill.getBBoxSize())        
         const isSafeDistAway = this.boundingBoxes.every((box) => !newTestBox.intersectsBox(box))
         return isSafeDistAway
     }
@@ -68,3 +82,7 @@ class WindFarm extends THREE.Group {
 
 
 export {WindFarm}
+
+
+
+// place windmills where you want, where the most wind is / according to the terrain to try and generate the most electricity

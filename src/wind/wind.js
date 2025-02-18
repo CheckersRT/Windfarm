@@ -113,7 +113,7 @@ class WindInstance extends THREE.Object3D {
             this.dummy.position.set(
                 rndA * 10, 
                 rndB * 4,
-                rndC * 10,
+                rndC * 20,
             )
             this.dummy.rotation.set(Math.PI / 2, 0 , 0)
             this.initialLineXPos.push(this.dummy.position.x)
@@ -151,10 +151,7 @@ class WindInstance extends THREE.Object3D {
     }
 
     animateDirection() {
-        // Convert angle from degrees to radians
         const angleRad = THREE.MathUtils.degToRad(this.direction);
-
-        // Move the wind instance in the direction of the angle
         this.mesh.position.x += Math.cos(angleRad) * this.speed;
         this.mesh.position.z += Math.sin(angleRad) * this.speed;
 
@@ -178,7 +175,6 @@ class WindInstance extends THREE.Object3D {
         for (let i = 0; i < this.mesh.count; i++) {
             let { x, z } = this.mesh.position;
     
-            // Project onto the movement axis to check loop conditions
             let projectedPos = x * moveX + z * moveZ;
     
             if (projectedPos > this.maxX + this.radius) {
@@ -226,8 +222,6 @@ class Wind extends THREE.Group {
             windInstance.loop(time)
         })
     }
-    addToScene() {}
-
 }
 
 const windParams = {

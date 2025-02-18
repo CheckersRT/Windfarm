@@ -4,12 +4,12 @@ import {turbineBody, turbineCone, turbineRotor} from "./turbine"
 import Controller from "../controller"
 
 class Windmill {
-    bufferScaleFactor = 8
+    bBoxScaleVector = new THREE.Vector3(8, 0, 8)
 
     constructor() {
         this.object = Windmill.baseWindmill.clone()
-        this.boundingBox = this.createBBox(this.object)
-        this.helper = this.createHelper(this.boundingBox)
+        this.boundingBox = this.createBBox()
+        this.helper = this.createHelper()
     }
 
     static createBaseWindmill() {
@@ -18,23 +18,25 @@ class Windmill {
         return baseWindmill
     }
     static baseWindmill = Windmill.createBaseWindmill()
-    static baseWindmillBBox = new THREE.Box3().setFromObject(Windmill.baseWindmill).expandByVector(new THREE.Vector3(8, 0, 8))
-    static baseWindmillBBoxSize = Windmill.baseWindmillBBox.getSize(new THREE.Vector3())
 
     getBBoxSize() {
         return this.boundingBox.getSize(new THREE.Vector3())
     }
 
-    createBBox(object) {
-        return new THREE.Box3().setFromObject(object).expandByVector(new THREE.Vector3(8, 0, 8))
+    createBBox() {
+        return new THREE.Box3().setFromObject(this.object).expandByVector(this.bBoxScaleVector)
     }
 
-    createHelper(box) {
-        return new THREE.Box3Helper( box, 0xffff00 )
+    createHelper() {
+        return new THREE.Box3Helper( this.boundingBox, 0xffff00 )
     }
 
     setPosition(x, y, z) {
         this.object.position.set(x, y, z)
+    }
+
+    setBBoxPosition() {
+        this.boundingBox.setFromObject(this.object).expandByVector(this.bBoxScaleVector)
     }
 
     animateRotation() {

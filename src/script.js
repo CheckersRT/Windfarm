@@ -1,5 +1,6 @@
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/Addons.js"
+import { DragControls } from 'three/addons/controls/DragControls.js';
 import {Terrain} from "./terrain"
 import { Wind } from "./wind/wind";
 import setUpDebugGUI from "./debug";
@@ -7,7 +8,7 @@ import { WindFarm } from "./windfarm";
 
 const canvas = document.querySelector("canvas.webgl")
 
-let camera, scene, renderer, controls, gui, wind, windfarm
+let camera, scene, renderer, controls, dragControls, gui, wind, windfarm
 
 function init() {
   scene = new THREE.Scene()
@@ -26,7 +27,7 @@ function init() {
 
   // Controls
   controls = new OrbitControls(camera, canvas)
-  // controls.enabled = false
+  controls.enabled = false
   controls.enableDamping = true
   controls.update()
 
@@ -57,9 +58,15 @@ function init() {
   scene.add(...windfarm.helpers)
 
   // Wind
-  wind = new Wind(5)
+  wind = new Wind(1)
   scene.add(wind)
 
+  // Drag controls
+  const windmillObjs = windfarm.windmills.map((windmill) => (windmill.object))
+  console.log("windmillObjs", windmillObjs);
+  
+  dragControls = new DragControls(windmillObjs, camera, canvas)
+  dragControls.recursive = false
 }
 
 init()
