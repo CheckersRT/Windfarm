@@ -60,7 +60,7 @@ function init() {
   windfarm = new WindFarm(20)
   console.log(windfarm);
   
-  // scene.add(windfarm)
+  scene.add(windfarm)
   // scene.add(...windfarm.helpers)
 
   // Wind
@@ -86,13 +86,12 @@ dragControls.addEventListener("drag", (event) => {
   
   parent.children.map((child) => {
     if(child.uuid !== id) {
-      child.position.x = moveX
-      child.position.z = moveZ
+      child.position.x = moveX 
+      child.position.z = child.name === "turbineRotor" ? moveZ + 1.005 : moveZ
     }
   })
   orbitControls.enabled = false
   orbitControls.update()
-
 })
 
 dragControls.addEventListener("dragend", (event) => {
