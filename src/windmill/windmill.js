@@ -45,7 +45,7 @@ class Windmill {
         const controller = new Controller()
         const speed = controller.windSpeed
         const windAngle = THREE.MathUtils.degToRad(controller.windDirection);
-        this.object.children.find((child) => child.name === "turbineRotor").rotateY(-speed/5 * Math.cos(windAngle * Math.random() + 0.1))
+        this.object.children.find((child) => child.name === "turbineRotor").rotateZ(-speed/5 * Math.cos(windAngle * Math.random() + 0.1))
     }
 }
 
