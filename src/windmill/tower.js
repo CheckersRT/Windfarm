@@ -20,10 +20,9 @@ export {foundationMesh as foundation}
 const towerParams = {
   height: 10,
 }
-const towerGeo = new THREE.CylinderGeometry(0.2, 0.45, towerParams.height, 10, 10)
-const towerMat = new THREE.MeshBasicMaterial({color: "white"})
-const towerMesh = new THREE.Mesh(towerGeo, towerMat)
-towerMesh.position.y = towerParams.height / 2
 
-export {towerMesh as tower}
+const towerGeo = new THREE.CylinderGeometry(0.2, 0.45, towerParams.height, 10, 10)
+towerGeo.translate(0, towerParams.height / 2, 0)
+
+export { towerGeo}
 

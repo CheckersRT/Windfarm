@@ -1,18 +1,12 @@
 import * as THREE from "three"
-import {blade} from "./blade"
+import {blades} from "./blade"
+import { towerGeo } from "./tower";
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
 // Turbine body
 const turBodyParams = {
-    height: 1.75,
-  }
-
-const turBodyGeo = new THREE.CylinderGeometry(0.3, 0.3, turBodyParams.height, 10, 10)
-const turBodyMat = new THREE.MeshBasicMaterial({color: "white"})
-const turBodyMesh = new THREE.Mesh(turBodyGeo, turBodyMat)
-turBodyMesh.rotation.x = Math.PI / 2
-turBodyMesh.position.y = 10
-
-export {turBodyMesh as turbineBody}
+  height: 1.75,
+}
 
 // Turbine rotor Group
 const turRotorGroup = new THREE.Group()
@@ -26,41 +20,55 @@ const turRotorParams = {
     speed: -0.02,
 }
 const turRotorGeo = new THREE.CylinderGeometry(0.3, 0.3, turRotorParams.height, 10, 10)
-const turRotorMat = new THREE.MeshBasicMaterial({color: "white", wireframe: true})
-const turRotorMesh = new THREE.Mesh(turRotorGeo, turRotorMat)
-turRotorMesh.rotation.x = Math.PI / 2
-// turRotorMesh.position.z = turBodyParams.height / 2 + turRotorParams.separationDist + (turRotorParams.height / 2)
+turRotorGeo.rotateX(Math.PI / 2)
+turRotorGeo.translate(0, 10, 1.005)
+
+
+blades[0].geometry.rotateZ(-Math.PI / 2)
+blades[0].geometry.rotateX(Math.PI / 2)
+blades[0].geometry.translate(0 , 10, 1.005)
+
+blades[1].geometry.rotateZ(-Math.PI / 2)
+blades[1].geometry.rotateX(Math.PI / 2)
+blades[1].geometry.rotateZ((Math.PI / 3) * 2)
+blades[1].geometry.translate(0 , 10, 1.005)
+
+blades[2].geometry.rotateZ(-Math.PI / 2)
+blades[2].geometry.rotateX(Math.PI / 2)
+blades[2].geometry.rotateZ((Math.PI / 3) * 4)
+blades[2].geometry.translate(0 , 10, 1.005)
+
+
+const rotorGeoMerge = new BufferGeometryUtils.mergeGeometries([turRotorGeo.toNonIndexed(), blades[0].geometry, blades[1].geometry, blades[2].geometry])
+console.log(rotorGeoMerge, "rotorGeoMerge");
+
+const turRotorMat = new THREE.MeshBasicMaterial({color: "white", wireframe: false})
+const turRotorMesh = new THREE.Mesh(rotorGeoMerge, turRotorMat)
+// turRotorMesh.rotation.x = Math.PI / 2
+// turRotorMesh.position.y = 10
+turRotorMesh.name = "turbineRotor"
 
 turRotorGroup.add(turRotorMesh)
 
-// Blades
-const blade2 = blade.clone()
-blade2.quaternion.copy(new THREE.Quaternion().setFromEuler(new THREE.Euler((Math.PI / 3) * 2, Math.PI / 2, 0, "YXZ")));
 
-const blade3 = blade.clone()
-blade3.quaternion.copy(new THREE.Quaternion().setFromEuler(new THREE.Euler((Math.PI / 3) * 4, Math.PI / 2, 0, "YXZ")));
-
-turRotorGroup.add(blade, blade2, blade3);
-
-// Group position
-turRotorGroup.position.z = turBodyParams.height / 2 + turRotorParams.separationDist + (turRotorParams.height / 2)
-turRotorGroup.position.y = 10
-  
-export {turRotorGroup as turbineRotor, turRotorParams}
 
 // Turbine Cone
 const turConeParams = {
-    height: 0.6,
-  }
+  height: 0.6,
+}
+
 const turConeGeo = new THREE.ConeGeometry(0.3, turConeParams.height, 10, 10, false, 0, Math.PI * 2)
-const turConeMat = new THREE.MeshBasicMaterial({color: "white", wireframe: false})
-const turConeMesh = new THREE.Mesh(turConeGeo, turConeMat) 
-turConeMesh.rotation.x = Math.PI / 2
-turConeMesh.position.y = 10
-turConeMesh.position.z = (turBodyParams.height / 2) + turRotorParams.separationDist + turRotorParams.height + (turConeParams.height / 2)
+turConeGeo.rotateX(Math.PI / 2)
+turConeGeo.translate(0, 10, (turBodyParams.height / 2) + turRotorParams.separationDist + turRotorParams.height + (turConeParams.height / 2))
 
-export {turConeMesh as turbineCone}
+const turBodyGeo = new THREE.CylinderGeometry(0.3, 0.3, turBodyParams.height, 10, 10)
+turBodyGeo.rotateX(Math.PI / 2)
+turBodyGeo.translate(0, 10, 0)
 
+const turbineGeos = new BufferGeometryUtils.mergeGeometries([turConeGeo, turBodyGeo, towerGeo])
+const turbineMat = new THREE.MeshBasicMaterial({color: "white"})
+export const turbineMesh = new THREE.Mesh(turbineGeos, turbineMat)
+export const checkThingy = 0
+console.log("turbineMesh geo in turbine", turbineMesh)
 
-
-
+export {turRotorMesh as turbineRotor, turRotorParams}

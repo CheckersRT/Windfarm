@@ -18,41 +18,53 @@ const extrudeSettings = {
 // const shapeGeo = new THREE.ShapeGeometry(shape)
 const bladeGeo = new THREE.ExtrudeGeometry(bladeShape, extrudeSettings)
 bladeGeo.scale(0.07, 0.07, 0.07)
+const bladeGeo2 = bladeGeo.clone()
+const bladeGeo3 = bladeGeo.clone()
+
 const bladeMat = new THREE.MeshBasicMaterial({color: "white", wireframe: false})
+
 const bladeMesh = new THREE.Mesh(bladeGeo, bladeMat)
+const bladeMesh2 = new THREE.Mesh(bladeGeo2, bladeMat)
+const bladeMesh3 = new THREE.Mesh(bladeGeo3, bladeMat)
 
-const positionAttribute = bladeMesh.geometry.attributes.position;
+const blades = []
+blades.push(bladeMesh, bladeMesh2, bladeMesh3)
 
-// Find min and max Z values (to normalize step positions)
-let minZ = Infinity;
-let maxZ = -Infinity;
-for (let i = 0; i < positionAttribute.count; i++) {
-  const z = positionAttribute.getZ(i);
-  if (z < minZ) minZ = z;
-  if (z > maxZ) maxZ = z;
-}
+blades.forEach((blade) => {
 
-// Apply tapering effect by scaling XY based on Z
-for (let i = 0; i < positionAttribute.count; i++) {
-  const z = positionAttribute.getZ(i);
+  const positionAttribute = blade.geometry.attributes.position;
+  
+  // Find min and max Z values (to normalize step positions)
+  let minZ = Infinity;
+  let maxZ = -Infinity;
+  for (let i = 0; i < positionAttribute.count; i++) {
+    const z = positionAttribute.getZ(i);
+    if (z < minZ) minZ = z;
+    if (z > maxZ) maxZ = z;
+  }
+  
+  // Apply tapering effect by scaling XY based on Z
+  for (let i = 0; i < positionAttribute.count; i++) {
+    const z = positionAttribute.getZ(i);
+    
+    // Normalize z between 0 and 1 based on min/max
+    const t = (z - minZ) / (maxZ - minZ); // 0 at base, 1 at top
+    
+    // Define tapering scale (1.0 at base, 0.5 at top)
+    const scaleFactor = 1.0 - 0.9 * t; // Adjust 0.5 for more tapering
+    
+    // Scale X and Y based on taper factor
+    positionAttribute.setX(i, positionAttribute.getX(i) * scaleFactor);
+    positionAttribute.setY(i, positionAttribute.getY(i) * scaleFactor);
+  }
+  
+  // Update geometry after modification
+  positionAttribute.needsUpdate = true;
+  blade.geometry.computeVertexNormals();
+  blade.geometry.computeBoundingBox();
+  blade.geometry.computeBoundingSphere();
+  
+  blade.rotation.y = Math.PI / 2
+})
 
-  // Normalize z between 0 and 1 based on min/max
-  const t = (z - minZ) / (maxZ - minZ); // 0 at base, 1 at top
-
-  // Define tapering scale (1.0 at base, 0.5 at top)
-  const scaleFactor = 1.0 - 0.9 * t; // Adjust 0.5 for more tapering
-
-  // Scale X and Y based on taper factor
-  positionAttribute.setX(i, positionAttribute.getX(i) * scaleFactor);
-  positionAttribute.setY(i, positionAttribute.getY(i) * scaleFactor);
-}
-
-// Update geometry after modification
-positionAttribute.needsUpdate = true;
-bladeMesh.geometry.computeVertexNormals();
-bladeMesh.geometry.computeBoundingBox();
-bladeMesh.geometry.computeBoundingSphere();
-
-bladeMesh.rotation.y = Math.PI / 2
-
-export {bladeMesh as blade}
+export {blades}

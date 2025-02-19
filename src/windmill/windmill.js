@@ -1,7 +1,8 @@
 import * as THREE from "three"
-import {foundation, tower} from "./tower"
-import {turbineBody, turbineCone, turbineRotor} from "./turbine"
+import {foundation} from "./tower"
+import {turbineMesh, turbineRotor} from "./turbine"
 import Controller from "../controller"
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
 class Windmill {
     bBoxScaleVector = new THREE.Vector3(8, 0, 8)
@@ -10,11 +11,12 @@ class Windmill {
         this.object = Windmill.baseWindmill.clone()
         this.boundingBox = this.createBBox()
         this.helper = this.createHelper()
+        console.log("in constructor", this.object)
     }
 
     static createBaseWindmill() {
         const baseWindmill = new THREE.Group()
-        baseWindmill.add(foundation, tower, turbineBody, turbineCone, turbineRotor)
+        baseWindmill.add(turbineMesh, foundation, turbineRotor)
         return baseWindmill
     }
     static baseWindmill = Windmill.createBaseWindmill()
@@ -43,7 +45,7 @@ class Windmill {
         const controller = new Controller()
         const speed = controller.windSpeed
         const windAngle = THREE.MathUtils.degToRad(controller.windDirection);
-        this.object.children[4].rotateZ(-speed/5 * Math.cos(windAngle * Math.random() + 0.1))
+        this.object.children.find((child) => child.name === "turbineRotor").rotateY(-speed/5 * Math.cos(windAngle * Math.random() + 0.1))
     }
 }
 
