@@ -1,25 +1,26 @@
 import * as THREE from "three"
-import {foundation} from "./tower"
-import {turbineMesh, turbineRotor} from "./turbine"
-import Controller from "../controller"
-import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+import {Turbine, RotorBlades} from "./Turbine.js"
+import Controller from "../controller.js"
+import {Foundation} from "./Foundation.js"
 
 class Windmill {
     bBoxScaleVector = new THREE.Vector3(8, 0, 8)
 
     constructor() {
-        this.object = Windmill.baseWindmill.clone()
+        this.object = this.createWindmill()
         this.boundingBox = this.createBBox()
         this.helper = this.createHelper()
         console.log("in constructor", this.object)
     }
 
-    static createBaseWindmill() {
-        const baseWindmill = new THREE.Group()
-        baseWindmill.add(turbineMesh, foundation, turbineRotor)
-        return baseWindmill
+    createWindmill() {
+        const windmill = new THREE.Group()
+        const foundation = new Foundation()
+        const turbine = new Turbine()
+        const rotorBlades = new RotorBlades()
+        windmill.add(turbine.mesh, foundation.mesh, rotorBlades.mesh)
+        return windmill
     }
-    static baseWindmill = Windmill.createBaseWindmill()
 
     getBBoxSize() {
         return this.boundingBox.getSize(new THREE.Vector3())
@@ -45,7 +46,9 @@ class Windmill {
         const controller = new Controller()
         const speed = controller.windSpeed
         const windAngle = THREE.MathUtils.degToRad(controller.windDirection);
-        this.object.children.find((child) => child.name === "turbineRotor").rotateZ(-speed/5 * Math.cos(windAngle * Math.random() + 0.1))
+        if(this.object.length > 1) {
+            this.object.children.find((child) => child.name === "turbineRotor").rotateZ(-speed/5 * Math.cos(windAngle * Math.random() + 0.1))
+        }
     }
 }
 

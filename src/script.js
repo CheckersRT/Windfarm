@@ -1,16 +1,17 @@
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/Addons.js"
 import { DragControls } from 'three/addons/controls/DragControls.js';
-import {Terrain} from "./terrain"
-import { Wind } from "./wind/wind";
-import setUpDebugGUI from "./debug";
-import { WindFarm } from "./windfarm";
-import { turbineMesh, turbineRotor } from "./windmill/turbine";
-import {Windmill} from "./windmill/windmill"
+import { TransformControls } from "three/examples/jsm/Addons.js";
+import {Terrain} from "./terrain.js"
+import { Wind } from "./wind/wind.js";
+import setUpDebugGUI from "./debug.js";
+import { WindFarm } from "./windfarm.ts";
+import {Windmill} from "./windmill/Windmill.js"
+import { Blade } from "./windmill/Blade.js";
 
 const canvas = document.querySelector("canvas.webgl")
 
-let camera, scene, renderer, orbitControls, dragControls, gui, wind, windfarm
+let camera, scene, renderer, orbitControls, dragControls, transformControls, gui, wind, windfarm, raycaster
 
 function init() {
   scene = new THREE.Scene()
@@ -55,13 +56,12 @@ function init() {
   // Windfarm
 
   const windmillTest = new Windmill()
-  
+  const blade = new Blade()
+
   scene.add(windmillTest.object)
   windfarm = new WindFarm(20)
-  console.log(windfarm);
   
   scene.add(windfarm)
-  // scene.add(...windfarm.helpers)
 
   // Wind
   wind = new Wind(1)
@@ -70,11 +70,45 @@ function init() {
   // Drag controls
   const windmillObjs = windfarm.windmills.map((windmill) => (windmill.object))
   console.log("windmillObjs", windmillObjs);
-  
+
   dragControls = new DragControls([...windmillObjs, windmillTest.object], camera, canvas)
+  transformControls = new TransformControls(camera, canvas)
+  transformControls.setMode("rotate")
+  transformControls.attach(windmillTest.object)
+  transformControls.setSize(1)
+  transformControls.showX = false
+  transformControls.showZ = false
+  transformControls.addEventListener("dragging-changed", (event) => {
+    dragControls.enabled = !event.value
+    orbitControls.enabled = !event.value
+  })
+  scene.add(transformControls.getHelper())
+
+  raycaster = new THREE.Raycaster()
+
 }
 
 init()
+
+
+const clickPosition = new THREE.Vector2()
+window.addEventListener("click", onClick)
+
+function onClick(event) {
+  clickPosition.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	clickPosition.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+  raycaster.setFromCamera(clickPosition, camera)
+  const objects = windfarm.windmills.map((windmill) => windmill.object)
+  console.log("objects in click", objects)
+
+  const intersection = raycaster.intersectObjects(objects)
+  if(intersection.length > 0) {
+    console.log("intersection: ",  intersection, intersection[0].object.material)
+    intersection[0].object.material.emissive.set( "red" );
+
+  }
+}
 
 dragControls.addEventListener("drag", (event) => {
   const object = event.object
@@ -95,13 +129,21 @@ dragControls.addEventListener("drag", (event) => {
 })
 
 dragControls.addEventListener("dragend", (event) => {
-  console.log("pointerup event", event)
+  // if(event.shiftKey) return
+  console.log("pointerup event", event, event.shiftKey)
   orbitControls.enabled = true
   orbitControls.update()
 })
 
+
+window.addEventListener("mousemove", (event) => {
+  
+  // if(!event.shiftKey) return
+  console.log("SHIFTY SHITTY SHIFT")
+})
+
 window.addEventListener("click", (event) => {
-  console.log("click event", event)
+  console.log("click event", event, event.shiftKey)
 })
 
 

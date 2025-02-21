@@ -1,63 +1,91 @@
 import * as THREE from "three"
-import {blades} from "./blade"
-import { towerGeo } from "./tower";
+import {Blade} from "./Blade.js"
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-// Turbine body
-const turBodyParams = {
-  height: 1.75,
+export class Turbine {
+   constructor() {
+    this.tower = new Tower()
+    this.body = new TurbineBody()
+    this.rotor = new RotorBlades()
+    this.cone = new TurbineCone(this.body, this.rotor)
+
+    this.geometry = new BufferGeometryUtils.mergeGeometries([this.tower, this.body.geometry, this.cone]) // cone is causing problems
+    this.material = new THREE.MeshLambertMaterial({color: "white"})
+    this.mesh = new THREE.Mesh(this.geometry, this.material)
+   }
 }
 
-// Turbine rotor
-const turRotorParams = {
-    height: 0.2,
-    separationDist: 0.03,
-    rotate: false,
-    speed: -0.02,
-}
-const turRotorGeo = new THREE.CylinderGeometry(0.3, 0.3, turRotorParams.height, 10, 10)
-turRotorGeo.rotateX(Math.PI / 2)
-// turRotorGeo.translate(0, 10, 1.005)
+class Tower {
+  height = 10
 
-
-blades[0].geometry.rotateZ(-Math.PI / 2)
-blades[0].geometry.rotateX(Math.PI / 2)
-// blades[0].geometry.translate(0 , 10, 1.005)
-
-blades[1].geometry.rotateZ(-Math.PI / 2)
-blades[1].geometry.rotateX(Math.PI / 2)
-blades[1].geometry.rotateZ((Math.PI / 3) * 2)
-// blades[1].geometry.translate(0 , 10, 1.005)
-
-blades[2].geometry.rotateZ(-Math.PI / 2)
-blades[2].geometry.rotateX(Math.PI / 2)
-blades[2].geometry.rotateZ((Math.PI / 3) * 4)
-// blades[2].geometry.translate(0 , 10, 1.005)
-
-
-const rotorGeoMerge = new BufferGeometryUtils.mergeGeometries([turRotorGeo.toNonIndexed(), blades[0].geometry, blades[1].geometry, blades[2].geometry])
-
-const turRotorMat = new THREE.MeshBasicMaterial({color: "white", wireframe: false})
-const turRotorMesh = new THREE.Mesh(rotorGeoMerge, turRotorMat)
-turRotorMesh.name = "turbineRotor"
-turRotorMesh.position.y = 10
-turRotorMesh.position.z = 1.005
-
-// Turbine Cone
-const turConeParams = {
-  height: 0.6,
+  constructor() {
+    const geometry = new THREE.CylinderGeometry(0.2, 0.45, this.height, 10, 10)
+    geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, this.height / 2, 0))
+    return geometry
+  }
 }
 
-const turConeGeo = new THREE.ConeGeometry(0.3, turConeParams.height, 10, 10, false, 0, Math.PI * 2)
-turConeGeo.rotateX(Math.PI / 2)
-turConeGeo.translate(0, 10, (turBodyParams.height / 2) + turRotorParams.separationDist + turRotorParams.height + (turConeParams.height / 2))
+class TurbineBody {
+  height = 1.75
 
-const turBodyGeo = new THREE.CylinderGeometry(0.3, 0.3, turBodyParams.height, 10, 10)
-turBodyGeo.rotateX(Math.PI / 2)
-turBodyGeo.translate(0, 10, 0)
+  constructor() {
+    this.geometry = new THREE.CylinderGeometry(0.3, 0.3, this.height, 10, 10)
+    this.geometry.rotateX(Math.PI / 2)
+    this.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 10, 0))
+  }
+}
 
-const turbineGeos = new BufferGeometryUtils.mergeGeometries([turConeGeo, turBodyGeo, towerGeo])
-const turbineMat = new THREE.MeshBasicMaterial({color: "white"})
-export const turbineMesh = new THREE.Mesh(turbineGeos, turbineMat)
 
-export {turRotorMesh as turbineRotor, turRotorParams}
+class TurbineCone {
+  height = 0.6
+  
+  constructor(body, rotor) {
+    console.log("body", body, "rotor", rotor);
+    
+    const geometry = new THREE.ConeGeometry(0.3, this.height, 10, 10, false, 0, Math.PI * 2)
+    geometry.rotateX(Math.PI / 2)
+    const offsetZ = (body.height / 2) + rotor.separationDist + rotor.height + (this.height / 2)
+    geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 10, offsetZ))
+
+    return geometry
+  }
+}
+
+export class RotorBlades extends THREE.Object3D {
+  height = 0.2
+  separationDist = 0.03
+  rotate = false
+  speed = -0.02
+  blades = []
+
+  constructor() {
+    super()
+    this.body = new THREE.CylinderGeometry(0.3, 0.3, this.height, 10, 10)
+    this.body.rotateX(Math.PI / 2)
+    this.blades = Array.from({ length: 3 }, () => new Blade())
+    this.setBladePositions(this.blades)
+    this.geometry = new BufferGeometryUtils.mergeGeometries([
+      this.body.toNonIndexed(), 
+      this.blades[0].geometry, 
+      this.blades[1].geometry, 
+      this.blades[2].geometry
+    ])
+    this.material = new THREE.MeshLambertMaterial({color: "white", wireframe: false})
+    this.mesh = new THREE.Mesh(this.geometry, this.material)
+    this.mesh.name = "turbineRotor"
+    this.mesh.position.y = 10
+    this.mesh.position.z = 1.005
+  }
+
+  setBladePositions(blades) {
+    blades.forEach((blade, i) => {
+      switch (i) {
+        case 1:
+          blade.geometry.rotateZ((Math.PI / 3) * 2)
+          break;
+        case 2:
+          blade.geometry.rotateZ((Math.PI / 3) * 4)
+      }
+    })
+  }
+}

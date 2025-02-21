@@ -1,6 +1,6 @@
 import * as THREE from "three"
 import {Terrain} from "./terrain"
-import { Windmill } from "./windmill/windmill"
+import { Windmill } from "./windmill/Windmill"
 
 class WindFarm extends THREE.Group {
     quantity = 10

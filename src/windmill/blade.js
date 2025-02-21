@@ -1,51 +1,47 @@
 import * as THREE from "three"
 
-// Blade
-const x = 0, y = 0
+export class Blade {
+  extrudeSettings = {
+    steps: 10,
+    depth: 60,
+  }
 
-const bladeShape = new THREE.Shape()
-.moveTo( x + 2, y + 2.5 )
-.bezierCurveTo( x + 2.5, y + 2.5, x + 2.0, y, x, y )
-.bezierCurveTo( x - 3.0, y, x - 3.0, y + 3.5, x - 3.0, y + 3.5 )
-.bezierCurveTo( x - 3.0, y + 5.5, x - 1.0, y + 7.7, x + 2.5, y + 10.5 )
-.bezierCurveTo( x, y + 2.5, x + 2.5, y + 2.5, x + 2, y + 2.5 )
+  constructor() {
+    this.shape = this.createShape()
+    this.geometry = new THREE.ExtrudeGeometry(this.shape, this.extrudeSettings)
+    this.geometry.scale(0.07, 0.07, 0.07)
+    this.createTaper()
+    this.geometry.rotateY(Math.PI / 2)
+    this.geometry.name = "blade"
+    this.material = new THREE.MeshLambertMaterial({color: "white"})
+    this.mesh = new THREE.Mesh(this.geometry, this.material)
+  }
 
-const extrudeSettings = {
-  steps: 10,
-  depth: 60,
-}
+  createShape() {
+    const shape = new THREE.Shape()
+      .moveTo( 2, 2.5 )
+      .bezierCurveTo( 2.5, 2.5, 2.0, 0, 0, 0 )
+      .bezierCurveTo( -3.0, 0, -3.0, 3.5, -3.0, 3.5 )
+      .bezierCurveTo( -3.0, 5.5, -1.0, 7.7, 2.5, 10.5 )
+      .bezierCurveTo( 0, 2.5, 2.5, 2.5, 2, 2.5 )
+    return shape
+  }
 
-// const shapeGeo = new THREE.ShapeGeometry(shape)
-const bladeGeo = new THREE.ExtrudeGeometry(bladeShape, extrudeSettings)
-bladeGeo.scale(0.07, 0.07, 0.07)
-const bladeGeo2 = bladeGeo.clone()
-const bladeGeo3 = bladeGeo.clone()
-
-const bladeMat = new THREE.MeshBasicMaterial({color: "white", wireframe: false})
-
-const bladeMesh = new THREE.Mesh(bladeGeo, bladeMat)
-const bladeMesh2 = new THREE.Mesh(bladeGeo2, bladeMat)
-const bladeMesh3 = new THREE.Mesh(bladeGeo3, bladeMat)
-
-const blades = []
-blades.push(bladeMesh, bladeMesh2, bladeMesh3)
-
-blades.forEach((blade) => {
-
-  const positionAttribute = blade.geometry.attributes.position;
+  createTaper() {
+    const position = this.geometry.attributes.position;
   
   // Find min and max Z values (to normalize step positions)
   let minZ = Infinity;
   let maxZ = -Infinity;
-  for (let i = 0; i < positionAttribute.count; i++) {
-    const z = positionAttribute.getZ(i);
+  for (let i = 0; i < position.count; i++) {
+    const z = position.getZ(i);
     if (z < minZ) minZ = z;
     if (z > maxZ) maxZ = z;
   }
   
   // Apply tapering effect by scaling XY based on Z
-  for (let i = 0; i < positionAttribute.count; i++) {
-    const z = positionAttribute.getZ(i);
+  for (let i = 0; i < position.count; i++) {
+    const z = position.getZ(i);
     
     // Normalize z between 0 and 1 based on min/max
     const t = (z - minZ) / (maxZ - minZ); // 0 at base, 1 at top
@@ -54,17 +50,11 @@ blades.forEach((blade) => {
     const scaleFactor = 1.0 - 0.9 * t; // Adjust 0.5 for more tapering
     
     // Scale X and Y based on taper factor
-    positionAttribute.setX(i, positionAttribute.getX(i) * scaleFactor);
-    positionAttribute.setY(i, positionAttribute.getY(i) * scaleFactor);
+    position.setX(i, position.getX(i) * scaleFactor);
+    position.setY(i, position.getY(i) * scaleFactor);
   }
-  
-  // Update geometry after modification
-  positionAttribute.needsUpdate = true;
-  blade.geometry.computeVertexNormals();
-  blade.geometry.computeBoundingBox();
-  blade.geometry.computeBoundingSphere();
-  
-  blade.rotation.y = Math.PI / 2
-})
+  position.needsUpdate = true;
 
-export {blades}
+}
+}
+
