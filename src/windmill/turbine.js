@@ -12,6 +12,7 @@ export class Turbine {
     this.geometry = new BufferGeometryUtils.mergeGeometries([this.tower, this.body.geometry, this.cone]) // cone is causing problems
     this.material = new THREE.MeshLambertMaterial({color: "white"})
     this.mesh = new THREE.Mesh(this.geometry, this.material)
+    this.mesh.name = "turbine"
    }
 }
 

@@ -13,7 +13,7 @@ export class Foundation extends THREE.Object3D {
     this.geometry = new THREE.BoxGeometry(this.width, this.height, this.depth, this.widthSegments, this.heightSegments, this.depthSegments)
     this.material = new THREE.MeshLambertMaterial({color: "grey"})
     this.mesh = new THREE.Mesh(this.geometry, this.material)
-    this.mesh.position.y = this.height / 2
+    // this.mesh.position.y = this.height / 2
     this.mesh.name = "foundation"
   }
 }

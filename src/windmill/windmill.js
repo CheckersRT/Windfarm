@@ -14,7 +14,7 @@ class Windmill {
     }
 
     createWindmill() {
-        const windmill = new THREE.Group()
+        const windmill = new THREE.Object3D()
         const foundation = new Foundation()
         const turbine = new Turbine()
         const rotorBlades = new RotorBlades()
