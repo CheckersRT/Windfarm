@@ -1,6 +1,6 @@
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/Addons.js"
-import { DragControls } from 'three/addons/controls/DragControls.js';
+import { DragControls } from "./Controls/DragControls.js";
 import { TransformControls } from "three/examples/jsm/Addons.js";
 import {Terrain} from "./terrain.js"
 import { Wind } from "./wind/wind.js";
@@ -90,6 +90,9 @@ function init() {
   console.log("windmillObjs", windmillObjs);
 
   dragControls = new DragControls([...windmillObjs, windmillTest.object, sphere], camera, canvas)
+  dragControls.transformGroup = true
+  console.log("drag objects", dragControls.objects);
+  
   // dragControls.enabled = false
 
   transformControls = new TransformControls(camera, canvas)
@@ -100,12 +103,7 @@ function init() {
   transformControls.showX = false
   transformControls.showZ = false
   // transformControls.setSpace("local")
-  transformControls.addEventListener("dragging-changed", (event) => {
-    dragControls.enabled = !event.value
-    orbitControls.enabled = !event.value
-    console.log("tcontrols event", event, transformControls.rotationAngle);
-    
-  })  
+
   scene.add(transformControls.getHelper())
 
   raycaster = new THREE.Raycaster()
@@ -124,6 +122,17 @@ window.addEventListener("dblclick", onDblClick)
 dragControls.addEventListener("drag", onDrag)
 dragControls.addEventListener("dragstart", onDragStart)
 dragControls.addEventListener("dragend", onDragEnd)
+
+transformControls.addEventListener("dragging-changed", onRotate)  
+
+function onRotate(event) {
+    dragControls.enabled = !event.value
+    orbitControls.enabled = !event.value
+    console.log("tcontrols event", event, transformControls.rotationAngle);
+
+    console.log("transform objeect", transformControls.object.rotation)
+    
+}
 
 function onMouseMove(event) {
   pointer.x = ( event.offsetX / window.innerWidth ) * 2 - 1;
@@ -218,21 +227,23 @@ function onDrag(event) {
 
   
 
-  if (object.parent) {
+//   if (object.parent) {
     
-    const lastPosition = parentEndPos.get(object.parent.uuid) || {x: 0, y: 0, z: 0}
-    console.log("lastPOSITION", lastPosition);
-    
-
-    object.parent.position.x = lastPosition.x + object.position.x
-    object.parent.position.z = lastPosition.z + object.position.z
-
-    console.log("parent position", object.parent.position);
+//     const lastPosition = parentEndPos.get(object.parent.uuid) || {x: 0, y: 0, z: 0}
+//     console.log("lastPOSITION", lastPosition);
     
 
-    const children = object.parent.children
+//     object.parent.position.x = lastPosition.x + object.position.x
+//     object.parent.position.z = object.name === "turbineRotor" ? lastPosition.z + object.position.z + 1.005 : lastPosition.z + object.position.z 
 
-    object.position.set(0, 0, 0)
+//     console.log("parent position", object.parent.position);
+    
+
+//     const children = object.parent.children
+
+//     object.position.set(0, 0, 0)
+
+// }
 
   // const newPosition = object.position.clone(); // Save new position
 
@@ -248,7 +259,7 @@ function onDrag(event) {
     //   child.position.z = child.name === "turbineRotor" ? object.position.z + 1.005 : object.position.z
     //   // child.position.set(0, 0, 0)
     // })
-  }
+  // }
 
   // transformControls._root.updateMatrixWorld()
 

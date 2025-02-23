@@ -18,6 +18,7 @@ class WindFarm extends THREE.Group {
         for (let i = 0; i < quantity; i++) {
             this.addNew()
         }
+        this.name = "Windfarm"
     }
 
     createWindmill() {
