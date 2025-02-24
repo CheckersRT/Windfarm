@@ -6,7 +6,7 @@ import {Terrain} from "./terrain.js"
 import { Wind } from "./wind/wind.js";
 import setUpDebugGUI from "./debug.js";
 import { WindFarm } from "./windfarm.ts";
-import {Windmill} from "./windmill/Windmill.js"
+import {Windmill} from "./windmill/Windmill"
 
 const canvas = document.querySelector("canvas.webgl")
 
