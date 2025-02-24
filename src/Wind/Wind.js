@@ -105,6 +105,8 @@ class WindInstance extends THREE.Object3D {
     }
 
     positionLines(mesh) {
+        const angleRad = THREE.MathUtils.degToRad(this.direction);
+
         for(let i = 0; i < mesh.count; i++) {
             this.randomness.push({ rndA: Math.random() - 0.5, rndB: Math.random() - 0.5, rndC: Math.random() - 0.5 });
             
@@ -115,7 +117,7 @@ class WindInstance extends THREE.Object3D {
                 rndB * 4,
                 rndC * 20,
             )
-            this.dummy.rotation.set(Math.PI / 2, 0 , 0)
+            this.dummy.rotation.set(Math.PI / 2, 0 , angleRad)
             this.initialLineXPos.push(this.dummy.position.x)
             this.initialLineYPos.push(this.dummy.position.y)
             this.initialLineZPos.push(this.dummy.position.z)
@@ -126,7 +128,7 @@ class WindInstance extends THREE.Object3D {
         mesh.instanceMatrix.needsUpdate = true;
     }
 
-    animateLinePosition(time) {
+    animateLineMovement(time) {
         for (let i = 0; i < this.mesh.count; i++) {
     
             let { rndA, rndB } = this.randomness[i];
@@ -150,20 +152,10 @@ class WindInstance extends THREE.Object3D {
         WindInstance.baseLine.animateWave(time)
     }
 
-    animateDirection() {
+    animateInstanceMovement() {
         const angleRad = THREE.MathUtils.degToRad(this.direction);
         this.mesh.position.x += Math.cos(angleRad) * this.speed;
         this.mesh.position.z += Math.sin(angleRad) * this.speed;
-
-        for(let i = 0; i < this.mesh.count; i++) {
-            this.mesh.getMatrixAt(i, this.dummy.matrix)
-            this.dummy.matrix.decompose(this.dummy.position, this.dummy.quaternion, this.dummy.scale)
-
-            this.dummy.rotation.z = angleRad
-            this.dummy.updateMatrix()
-            this.mesh.setMatrixAt(i, this.dummy.matrix)
-        }
-        this.mesh.instanceMatrix.needsUpdate = true
     }
 
     loop() {
@@ -216,10 +208,10 @@ class Wind extends THREE.Group {
 
     animate(time) {
         this.array.forEach((windInstance) => {
-            windInstance.animateLinePosition(time)
-            windInstance.animateDirection()
+            windInstance.animateLineMovement(time)
+            windInstance.animateInstanceMovement()
             windInstance.animateLineWave(time)
-            windInstance.loop(time)
+            windInstance.loop()
         })
     }
 }
