@@ -1,7 +1,7 @@
 import * as THREE from "three"
 import GUI from "lil-gui"
-import {Terrain} from "./terrain"
-import {windParams} from "./wind/wind"
+import Terrain from "./Terrain.js"
+import {windParams} from "./Wind/Wind.js"
 
 
 function setUpDebugGUI() {
