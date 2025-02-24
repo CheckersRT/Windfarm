@@ -5,20 +5,20 @@ import {Foundation} from "./Foundation.js"
 
 class Windmill {
     bBoxScaleVector = new THREE.Vector3(8, 0, 8)
+    ranRotation = Math.random()
 
     constructor() {
         this.object = this.createWindmill()
         this.boundingBox = this.createBBox()
         this.helper = this.createHelper()
-        console.log("in constructor", this.object)
     }
 
     createWindmill() {
         const windmill = new THREE.Object3D()
-        const foundation = new Foundation()
-        const turbine = new Turbine()
-        const rotorBlades = new RotorBlades()
-        windmill.add(turbine.mesh, foundation.mesh, rotorBlades.mesh)
+        this.foundation = new Foundation()
+        this.turbine = new Turbine()
+        this.rotorBlades = new RotorBlades()
+        windmill.add(this.turbine.mesh, this.foundation.mesh, this.rotorBlades.mesh)
         return windmill
     }
 
@@ -45,10 +45,14 @@ class Windmill {
     animateRotation() {
         const controller = new Controller()
         const speed = controller.windSpeed
-        const windAngle = THREE.MathUtils.degToRad(controller.windDirection);
-        if(this.object.length > 1) {
-            this.object.children.find((child) => child.name === "turbineRotor").rotateZ(-speed/5 * Math.cos(windAngle * Math.random() + 0.1))
-        }
+        const windAngle = THREE.MathUtils.degToRad(controller.windDirection); 
+        this.object.rotation.reorder("YXZ")
+        const windmillAngle = this.object.rotation.y
+        
+        const angleDiff = windAngle - windmillAngle
+        const rotationFactor = Math.sin(angleDiff)        
+        
+        this.rotorBlades.mesh.rotateZ(-speed * rotationFactor)
     }
 }
 

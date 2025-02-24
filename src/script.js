@@ -61,7 +61,7 @@ function init() {
   
   // Windfarm
   windmillTest = new Windmill()
-  scene.add(windmillTest.object)
+  // scene.add(windmillTest.object)
 
   windfarm = new WindFarm(20)
   scene.add(windfarm)
@@ -83,7 +83,7 @@ function init() {
 
   // Wind
   wind = new Wind(1)
-  // scene.add(wind)
+  scene.add(wind)
 
   // Drag controls
   const windmillObjs = windfarm.windmills.map((windmill) => (windmill.object))
@@ -95,7 +95,6 @@ function init() {
   transformControls = new TransformControls(camera, canvas)
   // transformControls.enabled = false
   transformControls.setMode("rotate")
-  transformControls.attach(windmillTest.object)
   transformControls.setSize(1)
   transformControls.showX = false
   transformControls.showZ = false
