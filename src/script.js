@@ -2,11 +2,11 @@ import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/Addons.js"
 import { DragControls } from "./Controls/DragControls.js";
 import { TransformControls } from "three/examples/jsm/Addons.js";
-import {Terrain} from "./terrain.js"
-import { Wind } from "./wind/wind.js";
+import {Terrain} from "./Terrain.js"
+import { Wind } from "./Wind/Wind.js";
 import setUpDebugGUI from "./debug.js";
 import { WindFarm } from "./windfarm.ts";
-import {Windmill} from "./windmill/Windmill"
+import {Windmill} from "./Windmill/Windmill.js"
 
 const canvas = document.querySelector("canvas.webgl")
 

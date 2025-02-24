@@ -1,7 +1,7 @@
 import * as THREE from "three"
 import {Turbine, RotorBlades} from "./Turbine.js"
 import Controller from "../controller.js"
-import {Foundation} from "./Foundation.js"
+import Foundation from "./Foundation.js"
 
 class Windmill {
     bBoxScaleVector = new THREE.Vector3(8, 0, 8)

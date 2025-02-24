@@ -1,6 +1,6 @@
 import * as THREE from "three"
 
-export class Foundation extends THREE.Object3D {
+export default class Foundation extends THREE.Object3D {
   width = 2
   height = 0.2
   depth = 2
