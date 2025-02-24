@@ -1,8 +1,8 @@
 import * as THREE from "three"
-import {Terrain} from "./Terrain.js"
-import { Windmill } from "./Windmill/Windmill.js"
+import Terrain from "./Terrain.js"
+import Windmill from "./Windmill/Windmill.js"
 
-class WindFarm extends THREE.Group {
+export default class WindFarm extends THREE.Group {
     quantity = 10
     windmills: Windmill[] = []
     boundingBoxes: any = []
@@ -80,9 +80,6 @@ class WindFarm extends THREE.Group {
         })
     }
 }
-
-
-export {WindFarm}
 
 
 

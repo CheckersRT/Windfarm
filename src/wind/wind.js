@@ -1,5 +1,5 @@
 import * as THREE from "three"
-import { Terrain } from "../Terrain";
+import Terrain from "../Terrain";
 
 // Texture
 const canvas = document.createElement( 'CANVAS' );

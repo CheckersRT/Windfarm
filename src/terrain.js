@@ -1,6 +1,6 @@
 import * as THREE from "three"
 
-class Terrain {
+export default class Terrain {
     width = 100
     height = 100
 
@@ -13,5 +13,3 @@ class Terrain {
 
     
 }
-
-export {Terrain}

@@ -3,7 +3,7 @@ import {Turbine, RotorBlades} from "./Turbine.js"
 import Controller from "../controller.js"
 import Foundation from "./Foundation.js"
 
-class Windmill {
+export default class Windmill {
     bBoxScaleVector = new THREE.Vector3(8, 0, 8)
     ranRotation = Math.random()
 
@@ -15,7 +15,7 @@ class Windmill {
 
     createWindmill() {
         const windmill = new THREE.Object3D()
-        this.foundation = new Foundation()
+        this.foundation = new Foundation
         this.turbine = new Turbine()
         this.rotorBlades = new RotorBlades()
         windmill.add(this.turbine.mesh, this.foundation.mesh, this.rotorBlades.mesh)
@@ -56,5 +56,4 @@ class Windmill {
     }
 }
 
-export {Windmill}
 
