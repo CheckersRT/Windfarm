@@ -79,7 +79,7 @@ function init() {
 
   sphere.add(cube)
   // scene.add(sphere)
-  
+
 
 
   // Wind
