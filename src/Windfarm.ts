@@ -1,6 +1,6 @@
 import * as THREE from "three"
 import Terrain from "./Terrain.js"
-import Windmill from "./Windmill/Windmill.js"
+import Windmill from "./Windmill/TempWindmill.js"
 
 export default class WindFarm extends THREE.Group {
     quantity = 10
