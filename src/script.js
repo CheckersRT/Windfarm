@@ -66,6 +66,11 @@ function init() {
   windfarm = new WindFarm(20)
   scene.add(windfarm)
 
+  const size = 10;
+  const divisions = 10;
+
+  const gridHelper = new THREE.GridHelper( size, divisions );
+  scene.add( gridHelper );
 
   const cubeGeo = new THREE.BoxGeometry(2,2,2)
   const cubeMat = new THREE.MeshBasicMaterial({color: "purple"})
