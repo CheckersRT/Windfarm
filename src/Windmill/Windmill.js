@@ -15,7 +15,7 @@ export default class Windmill {
 
     createWindmill() {
         const windmill = new THREE.Object3D()
-        this.foundation = new Foundation
+        this.foundation = new Foundation()
         this.turbine = new Turbine()
         this.rotorBlades = new RotorBlades()
         windmill.add(this.turbine.mesh, this.foundation.mesh, this.rotorBlades.mesh)

@@ -6,7 +6,7 @@ export default class Terrain {
 
     constructor() {
         this.textureLoader = new THREE.TextureLoader()
-        this.colorTexture = this.textureLoader.load("public/stylized-grass1-bl/stylized-grass1_albedo.png")
+        this.colorTexture = this.textureLoader.load("stylized-grass1-bl/stylized-grass1_albedo.png")
         this.colorTexture.colorSpace = THREE.SRGBColorSpace
         this.colorTexture.repeat.x = 50
         this.colorTexture.repeat.y = 50
@@ -16,15 +16,16 @@ export default class Terrain {
         this.colorTexture.center.y = 0.5
         this.colorTexture.rotation = Math.PI / 3
 
-        this.normalTexture = this.textureLoader.load("public/stylized-grass1-bl/stylized-grass1_normal-ogl.png")
-        this.ambientOcclusionTexture = this.textureLoader.load("public/stylized-grass1-bl/stylized-grass1_ao.png")
-        this.heightTexture = this.textureLoader.load("public/stylized-grass1-bl/stylized-grass1_height.png")
-        this.metallicTexture = this.textureLoader.load("public/stylized-grass1-bl/stylized-grass1_metallic.png")
-        this.roughnessTexture = this.textureLoader.load("public/stylized-grass1-bl/stylized-grass1_roughness.png")
+        this.normalTexture = this.textureLoader.load("stylized-grass1-bl/stylized-grass1_normal-ogl.png")
+        this.ambientOcclusionTexture = this.textureLoader.load("stylized-grass1-bl/stylized-grass1_ao.png")
+        this.heightTexture = this.textureLoader.load("stylized-grass1-bl/stylized-grass1_height.png")
+        this.metallicTexture = this.textureLoader.load("stylized-grass1-bl/stylized-grass1_metallic.png")
+        this.roughnessTexture = this.textureLoader.load("stylized-grass1-bl/stylized-grass1_roughness.png")
 
 
         this.terrainGeo = new THREE.PlaneGeometry(this.width, this.height, 200, 200)
         this.terrainMat = new THREE.MeshBasicMaterial({color: "green", wireframe: false, side: THREE.DoubleSide, map: this.colorTexture})
+
         this.terrain = new THREE.Mesh(this.terrainGeo, this.terrainMat)
         this.terrain.rotation.x = Math.PI / 2
     }

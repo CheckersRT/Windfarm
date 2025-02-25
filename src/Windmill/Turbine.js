@@ -8,11 +8,20 @@ export class Turbine {
     this.body = new TurbineBody()
     this.rotor = new RotorBlades()
     this.cone = new TurbineCone(this.body, this.rotor)
+    this.texture = this.loadTexture()
 
     this.geometry = new BufferGeometryUtils.mergeGeometries([this.tower, this.body.geometry, this.cone]) // cone is causing problems
-    this.material = new THREE.MeshLambertMaterial({color: "white"})
+    // this.material = new THREE.MeshLambertMaterial({color: "white"})
+    this.material = new THREE.MeshMatcapMaterial()
+    this.material.map = this.texture
     this.mesh = new THREE.Mesh(this.geometry, this.material)
     this.mesh.name = "turbine"
+   }
+
+   loadTexture() {
+    const textureLoader = new THREE.TextureLoader()
+    const matcapTexture = textureLoader.load("textures/concrete/white-metal.png")
+    return matcapTexture
    }
 }
 
