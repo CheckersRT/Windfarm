@@ -44,9 +44,12 @@ function init() {
   setUpDebugGUI()
 
   // Light
+  const ambientLight = new THREE.AmbientLight(0xffffff)
   const light = new THREE.PointLight( 0xffffff, 3, 0, 0 );
-	light.position.copy( camera.position );
-	scene.add( light );
+  light.position.y = 10
+  light.position.z = 100
+	// light.position.copy( camera.position );
+	scene.add( ambientLight, light );
   
   // Render
   renderer = new THREE.WebGLRenderer({canvas})

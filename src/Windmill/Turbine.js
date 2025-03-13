@@ -11,9 +11,16 @@ export class Turbine {
     this.texture = this.loadTexture()
 
     this.geometry = new BufferGeometryUtils.mergeGeometries([this.tower, this.body.geometry, this.cone]) // cone is causing problems
-    // this.material = new THREE.MeshLambertMaterial({color: "white"})
-    this.material = new THREE.MeshMatcapMaterial()
-    this.material.map = this.texture
+    // this.material = new THREE.MeshLambertMaterial({color: "white"}) 
+    // this.material.flatShading = true
+    // this.material = new THREE.MeshMatcapMaterial()
+    // this.material.map = this.texture
+
+    this.material = new THREE.MeshToonMaterial()
+    this.texture.gradientTexture.minFilter = THREE.NearestFilter
+    this.texture.gradientTexture.magFilter = THREE.NearestFilter
+    this.material.gradientMap = this.texture.gradientTexture
+
     this.mesh = new THREE.Mesh(this.geometry, this.material)
     this.mesh.name = "turbine"
    }
@@ -21,7 +28,8 @@ export class Turbine {
    loadTexture() {
     const textureLoader = new THREE.TextureLoader()
     const matcapTexture = textureLoader.load("textures/concrete/white-metal.png")
-    return matcapTexture
+    const gradientTexture = textureLoader.load("static/textures/gradients/3.jpg")
+    return {matcapTexture, gradientTexture}
    }
 }
 
