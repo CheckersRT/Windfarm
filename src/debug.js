@@ -90,6 +90,7 @@ function setUpDebugGUI() {
 
     gui.add(windParams, "direction").name("Wind direction").min(0).max(360).step(1)
 
+    
     /**
      * 
      */

@@ -7,6 +7,7 @@ import { Wind } from "./Wind/Wind.js";
 import setUpDebugGUI from "./debug.js";
 import WindFarm from "./Windfarm.ts";
 import Windmill from "./Windmill/Windmill.js"
+import exportGLTF from "./utils/Exporter.js";
 
 const canvas = document.querySelector("canvas.webgl")
 
@@ -41,7 +42,7 @@ function init() {
   orbitControls.update()
 
   // DebugGUI
-  setUpDebugGUI()
+  gui = setUpDebugGUI()
 
   // Light
   const ambientLight = new THREE.AmbientLight(0xffffff)
@@ -111,11 +112,19 @@ function init() {
 
   raycaster = new THREE.Raycaster()
 
+  const params = {
+    export: exportScene
+  }
+
+  gui.add(params, "export").name("Export")
+
 }
 
 init()
 
-
+export function exportScene() {
+  return exportGLTF(scene)
+}
 
 document.addEventListener("mousemove", onMouseMove)
 document.addEventListener("click", onClick)
